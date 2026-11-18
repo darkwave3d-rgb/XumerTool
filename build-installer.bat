@@ -9,3 +9,6 @@ for %%f in (fonts\OFL-*.txt) do call set PAY=%%PAY%% /resource:%%f,payload/Licen
 "%CSC%" /nologo /utf8output /target:winexe /optimize+ /win32icon:app.ico /out:bin\XUMER-TOOL-Setup.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll %PAY% installer\Setup.cs src\Lang.cs
 if errorlevel 1 (echo Creazione installer FALLITA & pause & exit /b 1)
 echo Fatto: bin\XUMER-TOOL-Setup.exe
+rem Versione portatile (senza installer): bin\XumerTool-<versione>-portable.zip
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0make-portable.ps1"
+if errorlevel 1 (echo Creazione zip portatile FALLITA & pause & exit /b 1)
