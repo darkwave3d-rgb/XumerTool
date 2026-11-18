@@ -288,6 +288,33 @@ static class IconMaker
         return res;
     }
 
+    /// <summary>Immagine di icona in formato DIB a 32 bit (BITMAPINFOHEADER, pixel dal basso, maschera AND).</summary>
+    public static byte[] Dib(Bitmap b)
+    {
+        int n = b.Width, h = b.Height;
+        int maskRow = ((n + 31) / 32) * 4;
+        using (MemoryStream ms = new MemoryStream())
+        using (BinaryWriter w = new BinaryWriter(ms))
+        {
+            w.Write(40); w.Write(n); w.Write(h * 2); w.Write((short)1); w.Write((short)32);
+            w.Write(0); w.Write(n * h * 4 + maskRow * h); w.Write(0); w.Write(0); w.Write(0); w.Write(0);
+            for (int y = h - 1; y >= 0; y--)
+                for (int x = 0; x < n; x++)
+                {
+                    Color c = b.GetPixel(x, y);
+                    w.Write(c.B); w.Write(c.G); w.Write(c.R); w.Write(c.A);
+                }
+            for (int y = h - 1; y >= 0; y--)
+            {
+                byte[] row = new byte[maskRow];
+                for (int x = 0; x < n; x++)
+                    if (b.GetPixel(x, y).A == 0) row[x / 8] |= (byte)(0x80 >> (x % 8));
+                w.Write(row);
+            }
+            return ms.ToArray();
+        }
+    }
+
     static int Main(string[] args)
     {
         string outDir = args[1];
@@ -301,9 +328,13 @@ static class IconMaker
         foreach (int s in sizes) renders[s] = Render(s, ink);
         renders[256].Save(Path.Combine(outDir, "icon-256.png"), ImageFormat.Png);
 
+        // solo la 256 in PNG; le altre come bitmap (DIB): Windows le carica subito, senza decodificare PNG
         List<byte[]> pngs = new List<byte[]>();
         foreach (int s in sizes)
+        {
+            if (s < 256) { pngs.Add(Dib(renders[s])); continue; }
             using (MemoryStream ms = new MemoryStream()) { renders[s].Save(ms, ImageFormat.Png); pngs.Add(ms.ToArray()); }
+        }
         using (BinaryWriter w = new BinaryWriter(File.Create(Path.Combine(outDir, "app.ico"))))
         {
             w.Write((short)0); w.Write((short)1); w.Write((short)sizes.Length);

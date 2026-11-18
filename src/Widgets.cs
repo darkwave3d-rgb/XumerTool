@@ -377,12 +377,16 @@ namespace XumerTool
             return b;
         }
 
+        static System.Drawing.Icon appIcon;
+
+        /// <summary>L'icona dell'app (letta una volta sola e condivisa da tutte le finestre).</summary>
         public static System.Drawing.Icon MakeAppIcon()
         {
+            if (appIcon != null) return appIcon;
             try
             {
                 using (Stream s = typeof(Theme).Assembly.GetManifestResourceStream("app.ico"))
-                    if (s != null) return new System.Drawing.Icon(s);
+                    if (s != null) return appIcon = new System.Drawing.Icon(s);
             }
             catch { }
             Color back = Color.FromArgb(0x2E, 0x2C, 0x9B), fore = Color.FromArgb(0x9A, 0x97, 0xF7);
