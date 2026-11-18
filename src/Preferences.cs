@@ -14,13 +14,13 @@ namespace XumerTool
         public string LangCode;
         RadioButton[] langButtons;
         public string FontId;
-        public bool SaverOn, SaverFull, AutoConnect, TrySaver;
+        public bool SaverOn, SaverFull, AutoConnect, TrySaver, DirTxt;
 
         readonly ThemePicker picker;
         readonly Control themePreview, themeChips;
         readonly ListBox fonts;
         readonly Panel preview;
-        readonly CheckBox chkSaver, chkAuto;
+        readonly CheckBox chkSaver, chkAuto, chkDirTxt;
         readonly RadioButton rbDir, rbFull;
 
         static readonly Font NameFont = new Font("Segoe UI Semibold", 10f);
@@ -351,13 +351,36 @@ namespace XumerTool
             public PreviewBox() { SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true); }
         }
 
-        static Label Section(string text)
+        /// <summary>Tinta tenue del corpo di una sezione (come lo sfondo delle sezioni della barra a nastro).</summary>
+        static Color Tint(Color c) { return Theme.Blend(c, Theme.Surface, 0.90f); }
+
+        /// <summary>
+        /// Sezione colorata come nella barra a nastro: fascia del titolo nel colore pieno (testo centrato)
+        /// e corpo nella tinta tenue dello stesso colore, largo <paramref name="width"/>.
+        /// </summary>
+        static TableLayoutPanel Card(string title, Color color, Control content, int width)
         {
-            return new Label
+            TableLayoutPanel card = new TableLayoutPanel
             {
-                Text = text.ToUpperInvariant(), AutoSize = true, ForeColor = Theme.Icon,
-                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), Margin = new Padding(0, Theme.S(16), 0, Theme.S(8))
+                ColumnCount = 1, RowCount = 2, AutoSize = true, BackColor = Tint(color),
+                Margin = new Padding(0, 0, 0, Theme.S(10)), Padding = new Padding(0)
             };
+            card.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            card.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            card.Controls.Add(new Label
+            {
+                Text = title.ToUpperInvariant(), AutoSize = false, Size = new Size(width, Theme.S(20)), TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = color, ForeColor = Theme.SectionCaptionText, Font = GroupFont, Margin = new Padding(0)
+            }, 0, 0);
+            Panel inner = new Panel
+            {
+                AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, BackColor = Tint(color), Dock = DockStyle.Fill,
+                MinimumSize = new Size(width, 0), Padding = new Padding(Theme.S(12), Theme.S(8), Theme.S(12), Theme.S(10)), Margin = new Padding(0)
+            };
+            content.Location = new Point(inner.Padding.Left, inner.Padding.Top);   // il Padding vale solo per i controlli agganciati
+            inner.Controls.Add(content);
+            card.Controls.Add(inner, 0, 1);
+            return card;
         }
 
         public PreferencesDialog(bool busy)
@@ -371,7 +394,7 @@ namespace XumerTool
             ForeColor = Theme.Text;
             Font = new Font("Segoe UI", 9.5f);
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Theme.S(780), Theme.S(930));
+            ClientSize = new Size(Theme.S(780), Theme.S(960));
             Icon = Theme.MakeAppIcon();
 
             ThemeName = Theme.Current;
@@ -387,37 +410,38 @@ namespace XumerTool
             FlowLayoutPanel body = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true,
-                BackColor = Theme.Surface, Padding = new Padding(Theme.S(20), 0, Theme.S(16), Theme.S(10))
+                BackColor = Theme.Surface, Padding = new Padding(Theme.S(20), Theme.S(14), Theme.S(16), Theme.S(6))
             };
+            int full = Theme.S(740);
 
-            // ---------- Aspetto ----------
-            body.Controls.Add(Section(Lang.T("Aspetto · tema")));
-            TableLayoutPanel themeRow = new TableLayoutPanel { ColumnCount = 2, AutoSize = true, Margin = new Padding(0), BackColor = Theme.Surface };
-            FlowLayoutPanel themeLeft = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, Theme.S(14), 0), BackColor = Theme.Surface };
+            // ---------- Aspetto · tema (colore della sezione Disco) ----------
+            Color cTheme = Theme.SectionDisk, tTheme = Tint(cTheme);
+            TableLayoutPanel themeRow = new TableLayoutPanel { ColumnCount = 2, AutoSize = true, Margin = new Padding(0), BackColor = tTheme };
+            FlowLayoutPanel themeLeft = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, Theme.S(14), 0), BackColor = tTheme };
             picker = new ThemePicker { Margin = new Padding(0) };
             picker.Selected = ThemeName;
             themeLeft.Controls.Add(picker);
             themeLeft.Controls.Add(new Label
             {
-                AutoSize = true, MaximumSize = new Size(Theme.S(360), 0), ForeColor = Theme.Muted, Margin = new Padding(0, Theme.S(12), 0, Theme.S(8)),
+                AutoSize = true, MaximumSize = new Size(Theme.S(360), 0), ForeColor = Theme.Muted, Margin = new Padding(0, Theme.S(10), 0, Theme.S(6)),
                 Text = Lang.T("Apri il menu per vedere tutti i temi, oppure usa le frecce ↑ ↓. Il tema viene applicato quando premi Salva.")
             });
             themeChips = new PreviewBox { Size = new Size(Theme.S(360), Theme.S(24)), Margin = new Padding(0) };
             themeChips.Paint += PaintChips;
             themeLeft.Controls.Add(themeChips);
             themeRow.Controls.Add(themeLeft, 0, 0);
-            themePreview = new PreviewBox { Size = new Size(Theme.S(350), Theme.S(168)), Margin = new Padding(0) };
+            themePreview = new PreviewBox { Size = new Size(Theme.S(340), Theme.S(160)), Margin = new Padding(0) };
             themePreview.Paint += (s, e) => PaintMiniature(e.Graphics, new Rectangle(0, 0, themePreview.Width - 1, themePreview.Height - 1), Theme.Get(ThemeName), true);
             themeRow.Controls.Add(themePreview, 1, 0);
             picker.SelectedChanged += delegate { ThemeName = picker.Selected; themePreview.Invalidate(); themeChips.Invalidate(); };
-            body.Controls.Add(themeRow);
+            Control themeCard = Card(Lang.T("Aspetto · tema"), cTheme, themeRow, full);
 
-            // ---------- Carattere ----------
-            body.Controls.Add(Section(Lang.T("Carattere della directory")));
-            TableLayoutPanel fontRow = new TableLayoutPanel { ColumnCount = 2, AutoSize = true, Margin = new Padding(0), BackColor = Theme.Surface };
+            // ---------- Carattere della directory (colore della sezione File) ----------
+            Color cFont = Theme.SectionFile, tFont = Tint(cFont);
+            TableLayoutPanel fontRow = new TableLayoutPanel { ColumnCount = 2, AutoSize = true, Margin = new Padding(0), BackColor = tFont };
             fonts = new ListBox
             {
-                DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = Theme.S(46), Width = Theme.S(360), Height = Theme.S(46) * 5 + 4,
+                DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = Theme.S(46), Width = Theme.S(346), Height = Theme.S(46) * 4 + 4,
                 BorderStyle = BorderStyle.FixedSingle, BackColor = Theme.Surface, ForeColor = Theme.Text, IntegralHeight = false, Margin = new Padding(0, 0, Theme.S(14), 0)
             };
             foreach (ScreenFontInfo f in ScreenFonts.All) if (ScreenFonts.Available(f)) fonts.Items.Add(f);
@@ -428,52 +452,112 @@ namespace XumerTool
                 if (f != null) { FontId = f.Id; preview.Invalidate(); }
             };
             fontRow.Controls.Add(fonts, 0, 0);
-            preview = new Panel { Width = Theme.S(350), Height = fonts.Height, BackColor = Theme.C64Frame, Margin = new Padding(0) };
+            preview = new Panel { Width = Theme.S(354), Height = fonts.Height, BackColor = Theme.C64Frame, Margin = new Padding(0) };
             preview.Paint += PaintPreview;
             fontRow.Controls.Add(preview, 1, 0);
-            body.Controls.Add(fontRow);
+            Control fontCard = Card(Lang.T("Carattere della directory"), cFont, fontRow, full);
             for (int i = 0; i < fonts.Items.Count; i++)
                 if (((ScreenFontInfo)fonts.Items[i]).Id == FontId) fonts.SelectedIndex = i;
 
-            // ---------- Salvaschermo ----------
-            body.Controls.Add(Section(Lang.T("Salvaschermo PETSCII")));
-            chkSaver = new CheckBox { Text = Lang.T("Attiva dopo 5 minuti senza usare tastiera e mouse"), Checked = SaverOn, AutoSize = true, Margin = new Padding(0, 0, 0, Theme.S(4)) };
-            body.Controls.Add(chkSaver);
-            rbDir = new RadioButton { Text = Lang.T("Nella finestra della directory (non copre le altre finestre)"), Checked = !SaverFull, AutoSize = true, Margin = new Padding(Theme.S(20), 0, 0, 0) };
-            rbFull = new RadioButton { Text = Lang.T("A tutto schermo (solo quando l'app è in primo piano)"), Checked = SaverFull, AutoSize = true, Margin = new Padding(Theme.S(20), 0, 0, Theme.S(4)) };
-            body.Controls.Add(rbDir);
-            body.Controls.Add(rbFull);
+            // ---------- Salvaschermo e Avvio · lingua, affiancati ----------
+            Color cSaver = Theme.TabGames, tSaver = Tint(cSaver);
+            // a tutta larghezza: opzioni a sinistra, "Prova ora" accanto
+            FlowLayoutPanel saverBox = new FlowLayoutPanel { AutoSizeMode = AutoSizeMode.GrowAndShrink, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoSize = true, Margin = new Padding(0), BackColor = tSaver };
+            FlowLayoutPanel saverOpts = new FlowLayoutPanel { AutoSizeMode = AutoSizeMode.GrowAndShrink, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, Theme.S(40), 0), BackColor = tSaver };
+            chkSaver = new CheckBox { Text = Lang.T("Dopo 5 minuti senza tastiera e mouse"), Checked = SaverOn, AutoSize = true, Margin = new Padding(0, 0, 0, Theme.S(2)) };
+            rbDir = new RadioButton { Text = Lang.T("Nella finestra della directory"), Checked = !SaverFull, AutoSize = true, Margin = new Padding(Theme.S(18), 0, 0, 0) };
+            rbFull = new RadioButton { Text = Lang.T("A tutto schermo (app in primo piano)"), Checked = SaverFull, AutoSize = true, Margin = new Padding(Theme.S(18), 0, 0, Theme.S(2)) };
+            IconButton tryIt = new IconButton(char.ConvertFromUtf32(0xE768), Lang.T("Prova ora"), ButtonKind.Toolbar) { Margin = new Padding(Theme.S(12), Theme.S(2), 0, 0) };
+            tryIt.Click += delegate { Collect(); TrySaver = true; DialogResult = DialogResult.OK; Close(); };
+            saverOpts.Controls.Add(chkSaver); saverOpts.Controls.Add(rbDir); saverOpts.Controls.Add(rbFull);
+            saverBox.Controls.Add(saverOpts); saverBox.Controls.Add(tryIt);
             chkSaver.CheckedChanged += delegate { rbDir.Enabled = rbFull.Enabled = chkSaver.Checked; };
             rbDir.Enabled = rbFull.Enabled = chkSaver.Checked;
-            IconButton tryIt = new IconButton(char.ConvertFromUtf32(0xE768), Lang.T("Prova ora"), ButtonKind.Toolbar) { Margin = new Padding(Theme.S(16), Theme.S(4), 0, 0) };
-            tryIt.Click += delegate { Collect(); TrySaver = true; DialogResult = DialogResult.OK; Close(); };
-            body.Controls.Add(tryIt);
 
-            // ---------- Avvio ----------
-            body.Controls.Add(Section(Lang.T("Avvio")));
-            chkAuto = new CheckBox { Text = Lang.T("Collega automaticamente l'adattatore all'avvio"), Checked = AutoConnect, AutoSize = true };
-            body.Controls.Add(chkAuto);
-
-            // ---------- Lingua ----------
-            body.Controls.Add(Section(Lang.Current == "it" ? "Lingua · Language" : "Language · Lingua"));
-            FlowLayoutPanel langRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = Theme.Surface };
+            Color cStart = Theme.TabLog, tStart = Tint(cStart);
+            // a tutta larghezza: collegamento automatico a sinistra, lingua a destra
+            FlowLayoutPanel startBox = new FlowLayoutPanel { AutoSizeMode = AutoSizeMode.GrowAndShrink, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoSize = true, Margin = new Padding(0), BackColor = tStart };
+            chkAuto = new CheckBox { Text = Lang.T("Collega automaticamente l'adattatore all'avvio"), Checked = AutoConnect, AutoSize = true, Margin = new Padding(0, Theme.S(14), Theme.S(40), 0) };
+            startBox.Controls.Add(chkAuto);
+            FlowLayoutPanel langBox = new FlowLayoutPanel { AutoSizeMode = AutoSizeMode.GrowAndShrink, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0), BackColor = tStart };
+            startBox.Controls.Add(langBox);
+            langBox.Controls.Add(new Label { Text = Lang.Current == "it" ? "Lingua · Language" : "Language · Lingua", AutoSize = true, Font = GroupFont, ForeColor = Theme.Muted, Margin = new Padding(0, 0, 0, Theme.S(2)) });
+            FlowLayoutPanel langRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = tStart };
             langButtons = new RadioButton[Lang.Codes.Length];
             for (int i = 0; i < Lang.Codes.Length; i++)
             {
                 langButtons[i] = new RadioButton { Text = Lang.Names[i], AutoSize = true, Checked = Lang.Codes[i] == LangCode, Margin = new Padding(0, 0, Theme.S(24), 0) };
                 langRow.Controls.Add(langButtons[i]);
             }
-            body.Controls.Add(langRow);
-            body.Controls.Add(new Label
+            langBox.Controls.Add(langRow);
+            langBox.Controls.Add(new Label
             {
-                AutoSize = true, ForeColor = Theme.Muted, Margin = new Padding(0, Theme.S(6), 0, 0),
+                AutoSize = true, ForeColor = Theme.Muted, Margin = new Padding(0, Theme.S(4), 0, 0),
                 Text = Lang.T("La nuova lingua si applica riavviando il programma.")
             });
+
+            Control saverCard = Card(Lang.T("Salvaschermo PETSCII"), cSaver, saverBox, full);
+            Control startCard = Card(Lang.T("Avvio · lingua"), cStart, startBox, full);
+
+            // ---------- Immagini disco (colore della sezione Immagini disco) ----------
+            Color cImg = Theme.SectionImage, tImg = Tint(cImg);
+            FlowLayoutPanel imgBox = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0), BackColor = tImg };
+            FlowLayoutPanel assocRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = tImg };
+            IconButton assocOn = new IconButton(char.ConvertFromUtf32(0xE8E5), Lang.T("Associa a XUMER TOOL"), ButtonKind.Toolbar) { Margin = new Padding(0, 0, Theme.S(6), 0) };
+            IconButton assocOff = new IconButton(char.ConvertFromUtf32(0xE711), Lang.T("Togli"), ButtonKind.Toolbar) { Margin = new Padding(0, 0, Theme.S(12), 0) };
+            int text = full - Theme.S(24);   // larghezza utile dentro una sezione
+            Label assocState = new Label { AutoSize = true, MaximumSize = new Size(text, 0), Margin = new Padding(0, Theme.S(4), 0, 0) };
+            assocRow.Controls.Add(assocOn); assocRow.Controls.Add(assocOff);
+            imgBox.Controls.Add(assocRow);
+            imgBox.Controls.Add(assocState);
+            imgBox.Controls.Add(new Label
+            {
+                AutoSize = true, ForeColor = Theme.Muted, MaximumSize = new Size(text, 0), Margin = new Padding(0, Theme.S(2), 0, Theme.S(4)),
+                Text = Lang.T("Doppio clic su un .d64, .d71 o .d81 per aprirlo. Se si apre un altro programma: clic destro → Apri con → XUMER TOOL.")
+            });
+            FlowLayoutPanel txtRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = tImg };
+            chkDirTxt = new CheckBox { Text = Lang.T("Crea un file .txt con la directory accanto a ogni immagine creata"), Checked = Settings.Get("dirtxt", "1") == "1", AutoSize = true, Margin = new Padding(0, Theme.S(8), Theme.S(12), 0) };
+            IconButton txtFolder = new IconButton(char.ConvertFromUtf32(0xE8B7), Lang.T("Per una cartella…"), ButtonKind.Toolbar) { Margin = new Padding(0) };
+            IconButton.Tips.SetToolTip(txtFolder, Lang.T("Crea il .txt della directory per tutte le immagini di una cartella (anche quelle create prima)"));
+            txtFolder.Click += delegate { MainForm.WriteDirectoryTxtForFolder(this); };
+            txtRow.Controls.Add(chkDirTxt); txtRow.Controls.Add(txtFolder);
+            imgBox.Controls.Add(txtRow);
+            Control imgCard = Card(Lang.T("Immagini disco"), cImg, imgBox, full);
+
+            // ---------- una sezione per riga, a tutta larghezza: Avvio · lingua, Immagini disco, Salvaschermo, Carattere, Tema ----------
+            body.Controls.Add(startCard);
+            body.Controls.Add(imgCard);
+            body.Controls.Add(saverCard);
+            body.Controls.Add(fontCard);
+            body.Controls.Add(themeCard);
+
+            Action showAssoc = delegate
+            {
+                FileAssoc.State st = FileAssoc.Get();
+                assocState.Text = st == FileAssoc.State.Here ? "✓ " + Lang.T("Associati a questa copia di XUMER TOOL.")
+                                : st == FileAssoc.State.Elsewhere ? Lang.T("Associati a un'altra cartella di XUMER TOOL (spostata?): premi il pulsante per aggiornare.")
+                                : Lang.T("Non associati.");
+                assocState.ForeColor = st == FileAssoc.State.Here ? Theme.Ok : Theme.Muted;
+                assocOff.Enabled = st != FileAssoc.State.None;
+            };
+            assocOn.Click += delegate
+            {
+                try { FileAssoc.Register(); }
+                catch (Exception ex) { MessageBox.Show(this, Lang.T("Associazione non riuscita: ") + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                showAssoc();
+            };
+            assocOff.Click += delegate
+            {
+                try { FileAssoc.Unregister(); }
+                catch (Exception ex) { MessageBox.Show(this, Lang.T("Associazione non tolta: ") + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                showAssoc();
+            };
+            showAssoc();
 
             if (busy)
                 body.Controls.Add(new Label
                 {
-                    AutoSize = true, ForeColor = Theme.Danger, Margin = new Padding(0, Theme.S(14), 0, 0),
+                    AutoSize = true, ForeColor = Theme.Danger, Margin = new Padding(0, Theme.S(2), 0, 0),
                     Text = Lang.T("C'è un'operazione in corso: tema e carattere verranno applicati quando sarà finita.")
                 });
 
@@ -498,6 +582,7 @@ namespace XumerTool
             SaverOn = chkSaver.Checked;
             SaverFull = rbFull.Checked;
             AutoConnect = chkAuto.Checked;
+            DirTxt = chkDirTxt.Checked;
             for (int i = 0; i < langButtons.Length; i++) if (langButtons[i].Checked) LangCode = Lang.Codes[i];
         }
 
@@ -505,7 +590,7 @@ namespace XumerTool
         void PaintChips(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.Clear(Theme.Surface);
+            g.Clear(themeChips.Parent != null ? themeChips.Parent.BackColor : Theme.Surface);   // il colore della sezione
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Palette p = Theme.Get(ThemeName);
             Color[] c = { p.Header, p.Window, p.Surface, p.Accent, p.SectionDisk, p.SectionFile, p.SectionImage, p.C64Back, p.C64Text, p.Ok, p.Danger };

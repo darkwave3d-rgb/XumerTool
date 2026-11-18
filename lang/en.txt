@@ -1748,3 +1748,121 @@ en: Track {0} sector {1}: {2} of 256 bytes arrived, retrying
 it: Copia veloce non disponibile per {0} sul drive {1}: uso la copia normale.
 en: Fast copy is not available for {0} on drive {1}: using the normal copy.
 
+
+# 18/11/2026 – immagini disco dal PC
+it: Dimensione dell'immagine non riconosciuta ({0} byte): sono supportate D64 (35 tracce), D71 e D81.
+en: Image size not recognised ({0} bytes): D64 (35 tracks), D71 and D81 are supported.
+
+it: Immagine rovinata: rimanda a traccia {0} settore {1}, che non esiste.
+en: Damaged image: it points to track {0} sector {1}, which does not exist.
+
+it: Le partizioni del 1581 non si possono estrarre come file.
+en: 1581 partitions cannot be extracted as files.
+
+it: Immagine rovinata: la catena dei blocchi del file "{0}" gira in tondo.
+en: Damaged image: the block chain of file "{0}" loops.
+
+it: apri immagine
+en: open image
+
+it: apri
+en: open
+
+it: Apri un'immagine D64/D71/D81 dal PC…
+en: Open a D64/D71/D81 image from the PC…
+
+it: Apri un'immagine disco
+en: Open a disk image
+
+it: Aspetta la fine dell'operazione in corso, poi riapri l'immagine.
+en: Wait until the current operation is finished, then open the image again.
+
+it: ERRORE: immagine non leggibile: 
+en: ERROR: image not readable: 
+
+it: Immagine non leggibile:\n
+en: Image not readable:\n
+
+it: Immagine aperta: {0} ({1}, {2} file, {3} blocchi liberi)
+en: Image opened: {0} ({1}, {2} files, {3} blocks free)
+
+it: Immagine disco Commodore
+en: Commodore disk image
+
+it: Immagini disco in Esplora risorse
+en: Disk images in File Explorer
+
+it: Associa a XUMER TOOL
+en: Associate with XUMER TOOL
+
+it: Togli
+en: Remove
+
+it: Doppio clic su un file .d64, .d71 o .d81: si apre la sua directory nello schermo blu. Se Windows usa già un altro programma: clic destro → Apri con → XUMER TOOL, con "Usa sempre".
+en: Double-click a .d64, .d71 or .d81 file: its directory opens on the blue screen. If Windows already uses another program: right-click → Open with → XUMER TOOL, with "Always use".
+
+it: Associati a questa copia di XUMER TOOL.
+en: Associated with this copy of XUMER TOOL.
+
+it: Associati a un'altra cartella di XUMER TOOL (spostata?): premi il pulsante per aggiornare.
+en: Associated with another XUMER TOOL folder (moved?): press the button to update.
+
+it: Non associati.
+en: Not associated.
+
+it: Associazione non riuscita: 
+en: Association failed: 
+
+it: Associazione non tolta: 
+en: Association not removed: 
+
+
+# 18/11/2026 – directory in .txt, menu del tasto destro, Preferenze a sezioni
+it: Directory salvata: 
+en: Directory saved: 
+
+it: ERRORE: directory .txt non salvata: 
+en: ERROR: directory .txt not saved: 
+
+it: Cartella con le immagini disco (.d64, .d71, .d81)
+en: Folder with the disk images (.d64, .d71, .d81)
+
+it: File .txt creati: {0}.
+en: .txt files created: {0}.
+
+it: Immagini non leggibili: {0}
+en: Unreadable images: {0}
+
+it: Avvia in VICE
+en: Run in VICE
+
+it: Salva la directory come .txt…
+en: Save the directory as .txt…
+
+it: Testo (*.txt)|*.txt
+en: Text (*.txt)|*.txt
+
+it: Dopo 5 minuti senza tastiera e mouse
+en: After 5 minutes without keyboard and mouse
+
+it: Nella finestra della directory
+en: In the directory window
+
+it: A tutto schermo (app in primo piano)
+en: Full screen (app in the foreground)
+
+it: Avvio · lingua
+en: Startup · language
+
+it: Crea un file .txt con la directory accanto a ogni immagine creata
+en: Create a .txt file with the directory next to every image created
+
+it: Per una cartella…
+en: For a folder…
+
+it: Crea il .txt della directory per tutte le immagini di una cartella (anche quelle create prima)
+en: Create the directory .txt for all the images in a folder (also those created earlier)
+
+it: Doppio clic su un .d64, .d71 o .d81 per aprirlo. Se si apre un altro programma: clic destro → Apri con → XUMER TOOL.
+en: Double-click a .d64, .d71 or .d81 to open it. If another program opens: right-click → Open with → XUMER TOOL.
+

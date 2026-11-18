@@ -1,4 +1,4 @@
-﻿XUMER TOOL 1.2.1b (beta) - di darkwave3D
+﻿XUMER TOOL 1.3b (beta) - di darkwave3D
 ========================================
 
 Programma per Windows per usare i drive Commodore 1541, 1571 e 1581

@@ -2,6 +2,15 @@
 
 [English](CHANGELOG.en.md)
 
+## 1.3b (beta) – 18/11/2026
+
+- **Immagini disco dal PC**: il tassello "apri immagine" (o il trascinamento sullo schermo blu) mostra la directory di una D64, D71 o D81 anche senza drive; i file si salvano sul PC (anche con doppio clic) o si avviano in VICE, e "scrivi immagine" propone l'immagine aperta.
+- **Doppio clic in Esplora risorse**: dalle Preferenze si associano i file .d64/.d71/.d81 a XUMER TOOL (solo per il tuo utente, senza amministratore; si toglie con "Togli"). Se il programma è già aperto, l'immagine si apre nella stessa finestra.
+- **Directory in .txt** in stile C64 accanto a ogni immagine creata (attiva all'inizio, si spegne nelle Preferenze); un pulsante la crea per tutte le immagini di una cartella.
+- **Menu del tasto destro** sui file: salva sul PC, avvia in VICE, rinomina, cancella, salva la directory come .txt.
+- **Preferenze riordinate**: sezioni colorate come la barra a nastro, una per riga, senza scorrere.
+- Lettura delle immagini verificata con c1541 di VICE (directory, blocchi liberi e file identici); un'immagine rovinata dà un errore chiaro. `xumtest image` mostra la directory di un'immagine ed estrae i file.
+
 ## 1.2.1b (beta) – 18/11/2026
 
 Correzioni dopo una revisione del codice.

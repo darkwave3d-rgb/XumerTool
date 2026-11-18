@@ -9,7 +9,7 @@
 <p align="center">
   Windows program to use Commodore <b>1541</b>, <b>1571</b> and <b>1581</b> disk drives from the PC,<br>
   with the <b>xum1541</b> USB adapter.<br>
-  <i>Version 1.2.1b · beta · Italian and English</i>
+  <i>Version 1.3b · beta · Italian and English</i>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 - **Disk**: directory on the blue C64 screen, validate, format.
 - **Files**: save files from the disk to the PC and write PC files to the disk (PRG, SEQ, P00), rename, delete. You can also drag files onto the blue screen.
-- **Disk images**: create and write **D64**, **D71** (1571 double-sided) and **D81** images, with a disk map that fills in sector by sector. Plus the experimental **fast copy** (OpenCBM's S2 protocol): a whole disk in about one minute.
+- **Disk images**: opens **D64**, **D71** and **D81** images from the PC even without a drive (by double-click in File Explorer or by dragging them onto the blue screen); creates and writes images on disk (with a C64-style directory .txt next to them), with a disk map that fills in sector by sector. Plus the experimental **fast copy** (OpenCBM's S2 protocol): a whole disk in about one minute.
 - **DOS commands**: command line with a list of ready-made commands, drive status reading and a legend of the error messages with an explanation and what to do.
 - **VICE**: run a program, an image or the whole disk in the emulator.
 - **Internet Archive**: connect your archive.org account to preserve your disk images (uploading will come in the next version).
@@ -47,7 +47,7 @@
 
 ## Installation
 
-1. Download `XumerTool-1.2.1b-portable.zip` from the **Releases** page, extract the `XUMER TOOL` folder wherever you like and run `XumerTool.exe`. Nothing needs to be installed; to remove it, just delete the folder.
+1. Download `XumerTool-1.3b-portable.zip` from the **Releases** page, extract the `XUMER TOOL` folder wherever you like and run `XumerTool.exe`. Nothing needs to be installed; to remove it, just delete the folder.
 2. Install the driver with Zadig: *Options → List All Devices*, choose **xum1541**, then **WinUSB** and **Install Driver**.
 3. Connect the adapter to the drive and to the PC and turn on the drive.
 4. Start XUMER TOOL: it connects by itself. Press **Directory**.
@@ -65,7 +65,7 @@ Still **to be tested on hardware**, use with care:
 - writing the firmware to the Pro Micro;
 - the 1581 drive (and therefore D81 images): it is supported, but not tested yet.
 
-What's new in each version is in the [changelog](CHANGELOG.en.md); planned work is in the [to-do list](TODO.md).
+What's new in each version is in the [changelog](CHANGELOG.en.md).
 
 ## Themes
 

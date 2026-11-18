@@ -12,7 +12,7 @@ namespace XumerTool
         [System.Runtime.InteropServices.DllImport("uxtheme.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         static extern int SetWindowTheme(IntPtr hWnd, string appName, string idList);
 
-        public const string AppVersion = "1.2.1b";   // "b" = beta
+        public const string AppVersion = "1.3b";   // "b" = beta
 
         /// <summary>L'utente ha premuto "Giochi": la finestra principale apre la scheda Giochi.</summary>
         public bool OpenGames;

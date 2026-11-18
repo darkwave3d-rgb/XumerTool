@@ -2,6 +2,15 @@
 
 [Italiano](CHANGELOG.md)
 
+## 1.3b (beta) – 2026-11-18
+
+- **Disk images from the PC**: the "open image" tile (or dragging onto the blue screen) shows the directory of a D64, D71 or D81 even with no drive; files can be saved to the PC (also by double-click) or run in VICE, and "write image" suggests the open image.
+- **Double-click in File Explorer**: Preferences can associate .d64/.d71/.d81 files with XUMER TOOL (your user only, no administrator; undo with "Remove"). If the program is already open, the image opens in the same window.
+- **Directory as .txt**, C64 style, next to every image created (on by default, can be turned off in Preferences); a button creates it for all the images in a folder.
+- **Right-click menu** on files: save to PC, run in VICE, rename, delete, save the directory as .txt.
+- **Tidier Preferences**: coloured sections like the ribbon, one per row, no scrolling.
+- Image reading checked against VICE's c1541 (identical directory, free blocks and files); a damaged image gives a clear error. `xumtest image` shows an image's directory and extracts its files.
+
 ## 1.2.1b (beta) – 2026-11-18
 
 Fixes after a code review.

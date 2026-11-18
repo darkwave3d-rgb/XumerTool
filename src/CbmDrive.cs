@@ -70,6 +70,13 @@ namespace XumerTool
         public string Type;      // "PRG", "SEQ", "USR", "REL", "DEL", "CBM", "DIR"
         public bool Splat;       // file non chiuso (*)
         public bool Locked;      // protetto (<)
+        public int Track, Sector; // primo blocco del file (solo per i file letti da un'immagine disco)
+
+        /// <summary>Riga della directory come la stampa il C64: blocchi, "nome", tipo (* = non chiuso, &lt; = protetto).</summary>
+        public string ListingLine()
+        {
+            return Blocks.ToString().PadRight(5) + ("\"" + Name + "\"").PadRight(19) + (Splat ? "*" : " ") + Type + (Locked ? "<" : "");
+        }
 
         public char TypeLetter
         {
@@ -92,6 +99,19 @@ namespace XumerTool
         public string DiskId = "";
         public int BlocksFree = -1;
         public List<DirEntry> Entries = new List<DirEntry>();
+
+        /// <summary>
+        /// La directory intera come la mostra il C64 dopo LOAD"$",8 e LIST: intestazione in negativo
+        /// (qui tra virgolette), un file per riga, blocchi liberi in fondo. Per i file .txt accanto alle immagini.
+        /// </summary>
+        public string ToListing()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("0 \"").Append(DiskName.PadRight(16)).Append("\" ").Append(DiskId).Append("\r\n");
+            foreach (DirEntry e in Entries) sb.Append(e.ListingLine()).Append("\r\n");
+            sb.Append(BlocksFree >= 0 ? BlocksFree.ToString() : "?").Append(" BLOCKS FREE.\r\n");
+            return sb.ToString();
+        }
 
         /// <summary>Interpreta il listato BASIC ottenuto aprendo "$".</summary>
         public static DiskDirectory Parse(byte[] d)

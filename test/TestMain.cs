@@ -3,6 +3,7 @@
 //   xumtest.exe 8 slow-read disco.d64       copia lenta (U1, circa 10 minuti): l'immagine di riferimento
 //   xumtest.exe 8 fast-read disco.d64       copia veloce S2 (solo lettura, il disco non viene scritto)
 //   xumtest.exe compare a.d64 b.d64         confronta due immagini settore per settore
+//   xumtest.exe image disco.d64 [cartella]  directory di un'immagine dal PC (con una cartella estrae i file)
 // .d71 al posto di .d64 = 1571 doppia faccia. Ctrl+C interrompe in modo pulito.
 using System;
 using System.Diagnostics;
@@ -16,6 +17,7 @@ namespace XumerTool
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             if (args.Length >= 3 && args[0] == "compare") return Compare(args[1], args[2]);
+            if (args.Length >= 2 && args[0] == "image") return ShowImage(args[1], args.Length >= 3 ? args[2] : null);
             int dev = 8;
             if (args.Length > 0 && (!int.TryParse(args[0], out dev) || dev < 8 || dev > 30))
             {
@@ -24,6 +26,7 @@ namespace XumerTool
                 Console.WriteLine("  xumtest.exe 8 slow-read disco.d64     copia lenta (U1), immagine di riferimento");
                 Console.WriteLine("  xumtest.exe 8 fast-read disco.d64     copia veloce S2 (solo lettura)");
                 Console.WriteLine("  xumtest.exe compare a.d64 b.d64       confronta due immagini (senza drive)");
+                Console.WriteLine("  xumtest.exe image disco.d64 [cartella] directory di un'immagine (ed estrae i file)");
                 Console.WriteLine("Il primo valore e' il numero del drive (8-11 di solito). .d71 = 1571 doppia faccia.");
                 return 2;
             }
@@ -83,6 +86,33 @@ namespace XumerTool
                 Console.WriteLine("ERRORE: " + ex.Message);
                 return 1;
             }
+        }
+
+        /// <summary>Directory di un'immagine dal PC (senza drive); con una cartella estrae anche tutti i file.</summary>
+        static int ShowImage(string path, string outDir)
+        {
+            try
+            {
+                DiskImage img = DiskImage.Load(path);
+                DiskDirectory d = img.ReadDirectory();
+                Console.WriteLine("{0}  \"{1}\" {2}{3}", img.Kind, d.DiskName, d.DiskId, img.HasErrorTable ? "  (con tabella errori)" : "");
+                foreach (DirEntry e in d.Entries)
+                {
+                    string info = "";
+                    if (outDir != null && e.Type != "CBM")
+                    {
+                        byte[] data = img.ReadFile(e);
+                        Directory.CreateDirectory(outDir);
+                        string n = e.Name; foreach (char c in Path.GetInvalidFileNameChars()) n = n.Replace(c, '_');
+                        File.WriteAllBytes(Path.Combine(outDir, n + "." + e.Type.ToLowerInvariant()), data);
+                        info = "  -> " + data.Length + " byte";
+                    }
+                    Console.WriteLine("{0,5}  \"{1}\"{2}{3}{4}{5}", e.Blocks, e.Name, new string(' ', Math.Max(1, 17 - e.Name.Length)), e.Splat ? "*" : " ", e.Type, (e.Locked ? "<" : "") + info);
+                }
+                Console.WriteLine("{0} BLOCKS FREE.", d.BlocksFree);
+                return 0;
+            }
+            catch (Exception ex) { Console.WriteLine("ERRORE: " + ex.Message); return 1; }
         }
 
         /// <summary>Confronta due immagini: settori diversi (traccia/settore) e tabelle degli errori.</summary>

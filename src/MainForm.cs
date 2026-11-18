@@ -96,6 +96,10 @@ namespace XumerTool
                 }
                 // offline: come senza drive collegato (pulsanti del drive disattivati)
                 if (Array.IndexOf(args, "offline") >= 0) f.DemoOffline();
+                // img=percorso: apre un'immagine disco nello schermo blu
+                foreach (string a in args) if (a.StartsWith("img=")) f.OpenImage(a.Substring(4));
+                // menu: salva anche il menu del tasto destro aperto (file "-menu.png" accanto allo screenshot)
+                if (Array.IndexOf(args, "menu") >= 0) f.ShotEntryMenu(Path.ChangeExtension(args[1], null) + "-menu.png");
                 // errors: la legenda dei messaggi nella scheda Comandi DOS, con un esempio nel registro
                 if (args.Length >= 5 && args[4] == "errors") f.DemoErrors();
                 // map / map71 / map81: la mappa del disco a metà di una copia
@@ -111,7 +115,13 @@ namespace XumerTool
                 return;
             }
             Theme.Apply(Settings.Get("theme", "Chiaro"));
-            Application.Run(new MainForm(true));
+            // un'immagine passata all'avvio (doppio clic su un .d64 in Esplora risorse, o "Apri con")
+            string startImage = null;
+            foreach (string a in args)
+                if (MainForm.IsImageFile(new[] { a })) { startImage = Path.GetFullPath(a); break; }
+            // se XUMER TOOL è già aperto, l'immagine va a quella finestra e questo avvio si chiude
+            if (!SingleInstance.Acquire(startImage)) return;
+            Application.Run(new MainForm(true) { StartupImage = startImage });
         }
     }
 
@@ -563,6 +573,7 @@ namespace XumerTool
 
         ComboBox cmbMachine;
         Segmented cmbDev;
+        IconButton btnOpenImage;
         IconButton btnConnect, btnReset, btnDir, btnSave, btnWrite, btnRename, btnScratch, btnFormat, btnValidate,
                    btnDiskToImg, btnImgToDisk, btnCancel, btnSend, btnStatus, btnClear, btnTheme,
                    btnViceFile, btnViceImage, btnViceDisk;
@@ -657,6 +668,9 @@ namespace XumerTool
             btnScratch = RibbonTile(gFile, Lang.T("cancella"), null, G_DELETE, Lang.T("Cancella"), OnScratch, cf, Theme.Danger);
 
             FlowLayoutPanel gImg = RibbonGroup(toolbar, Lang.T("Immagini disco"), ci);
+            // apre un'immagine dal PC e la mostra nello schermo blu: funziona anche senza drive collegato
+            btnOpenImage = RibbonTile(gImg, Lang.T("apri immagine"), Lang.T("apri"), G_FOLDER, Lang.T("Apri un'immagine D64/D71/D81 dal PC…"), OnOpenImage, ci, ci);
+            driveButtons.Remove(btnOpenImage);
             RibbonCell create = RibbonMulti(gImg, Lang.T("crea immagine"), Lang.T("crea"), ci);
             btnDiskToImg = RibbonVariant(create, G_SAVE, Lang.T("normale"), Lang.T("Crea immagine…"), OnDiskToImage, ci, ci);
             IconButton fast = RibbonVariant(create, G_SAVE, Lang.T("veloce"), Lang.T("Crea immagine veloce (sperimentale)…"), OnDiskToImageFast, ci, ci);
@@ -923,10 +937,20 @@ namespace XumerTool
             entryIconCol = -1;   // colonna delle icone dei file: si rimisura con il carattere nuovo
             lst.DrawItem += DrawEntry;
             lst.DoubleClick += OnSaveFiles;
+            // tasto destro: seleziona il file sotto il mouse (se non lo è già) e apre il menu dei comandi
+            lst.MouseDown += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Right) return;
+                int i = lst.IndexFromPoint(e.Location);
+                if (i >= 0 && !lst.GetSelected(i)) { lst.ClearSelected(); lst.SetSelected(i, true); }
+            };
+            lst.ContextMenuStrip = BuildEntryMenu();
             lst.KeyDown += (s, e) => { if (e.KeyCode == Keys.Delete) OnScratch(s, e); else if (e.KeyCode == Keys.F5) OnDirectory(s, e); };
             lst.DragEnter += (s, e) =>
             {
-                bool ok = e.Data.GetDataPresent(DataFormats.FileDrop) && drive != null && !Busy;
+                string[] files = e.Data.GetDataPresent(DataFormats.FileDrop) ? (string[])e.Data.GetData(DataFormats.FileDrop) : null;
+                // un'immagine disco si apre (anche senza drive); gli altri file si scrivono sul disco nel drive
+                bool ok = files != null && !Busy && (IsImageFile(files) || (drive != null && viewImage == null));
                 e.Effect = ok ? DragDropEffects.Copy : DragDropEffects.None;
                 if (ok) c64Frame.BackColor = Theme.C64FrameDrop;
             };
@@ -935,7 +959,9 @@ namespace XumerTool
             {
                 c64Frame.BackColor = Theme.C64Frame;
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                if (files != null) WriteFiles(files);
+                if (files == null) return;
+                if (IsImageFile(files)) OpenImage(files[0]);
+                else WriteFiles(files);
             };
 
             FlowLayoutPanel headLine = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, WrapContents = false, BackColor = Theme.C64Back, Margin = new Padding(0), Padding = new Padding(0, 0, 0, Theme.S(3)) };
@@ -1520,6 +1546,74 @@ namespace XumerTool
             else txtCmd.Select(c.Cmd.Length, 0);
         }
 
+        /// <summary>
+        /// Menu del tasto destro sui file della directory: gli stessi comandi della barra, con le stesse regole
+        /// (con un'immagine aperta dal PC niente rinomina/cancella, che agirebbero sul disco nel drive).
+        /// </summary>
+        ContextMenuStrip BuildEntryMenu()
+        {
+            ContextMenuStrip m = new ContextMenuStrip { Renderer = new ThemedRenderer(), ShowImageMargin = false, Font = new Font("Segoe UI", 9.5f) };
+            ToolStripMenuItem save = new ToolStripMenuItem(Lang.T("Salva sul PC…"), null, OnSaveFiles);
+            ToolStripMenuItem vice = new ToolStripMenuItem(Lang.T("Avvia in VICE"), null, OnViceFile);
+            ToolStripSeparator sep1 = new ToolStripSeparator();
+            ToolStripMenuItem rename = new ToolStripMenuItem(Lang.T("Rinomina…"), null, OnRename);
+            ToolStripMenuItem scratch = new ToolStripMenuItem(Lang.T("Cancella"), null, OnScratch);
+            ToolStripSeparator sep2 = new ToolStripSeparator();
+            ToolStripMenuItem listing = new ToolStripMenuItem(Lang.T("Salva la directory come .txt…"), null, delegate { SaveListingAs(); });
+            m.Items.AddRange(new ToolStripItem[] { save, vice, sep1, rename, scratch, sep2, listing });
+            m.Opening += (s, e) =>
+            {
+                if (currentDir == null) { e.Cancel = true; return; }   // schermo vuoto: niente da fare
+                List<DirEntry> sel = SelectedEntries();
+                bool busy = Busy, image = viewImage != null, online = drive != null || demo;
+                bool source = (online || image) && !busy;
+                save.Enabled = source && sel.Count > 0;
+                vice.Enabled = source && sel.Count == 1 && sel[0].Type == "PRG";
+                rename.Visible = scratch.Visible = sep1.Visible = !image;
+                rename.Enabled = online && !busy && sel.Count == 1;
+                scratch.Enabled = online && !busy && sel.Count > 0;
+            };
+            return m;
+        }
+
+        /// <summary>Per le anteprime: il menu del tasto destro aperto sul secondo file, salvato come immagine.</summary>
+        public void ShotEntryMenu(string file)
+        {
+            if (lst.Items.Count > 1) { lst.ClearSelected(); lst.SetSelected(1, true); }
+            ContextMenuStrip m = lst.ContextMenuStrip;
+            m.Show(new Point(-20000, -20000));
+            for (int i = 0; i < 3; i++) { Application.DoEvents(); Thread.Sleep(40); }
+            using (Bitmap b = new Bitmap(m.Width, m.Height))
+            {
+                m.DrawToBitmap(b, new Rectangle(Point.Empty, m.Size));
+                b.Save(file, System.Drawing.Imaging.ImageFormat.Png);
+            }
+            m.Close();
+        }
+
+        /// <summary>Salva la directory mostrata (drive o immagine) come .txt in stile C64, dove sceglie l'utente.</summary>
+        void SaveListingAs()
+        {
+            if (currentDir == null) return;
+            using (SaveFileDialog d = new SaveFileDialog())
+            {
+                d.Filter = Lang.T("Testo (*.txt)|*.txt");
+                if (viewImage != null)
+                {
+                    d.InitialDirectory = Path.GetDirectoryName(viewImage.FilePath);
+                    d.FileName = Path.GetFileNameWithoutExtension(viewImage.FilePath) + ".txt";
+                }
+                else d.FileName = SafeFileName(currentDir.DiskName.Length > 0 ? currentDir.DiskName : "disco", "txt");
+                if (d.ShowDialog(this) != DialogResult.OK) return;
+                try
+                {
+                    File.WriteAllText(d.FileName, currentDir.ToListing(), new System.Text.UTF8Encoding(false));
+                    Log(Lang.T("Directory salvata: ") + d.FileName);
+                }
+                catch (Exception ex) { MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            }
+        }
+
         /// <summary>Distanza della colonna delle icone dal bordo (30 caratteri), misurata una volta per carattere.</summary>
         int entryIconCol = -1;
 
@@ -1530,7 +1624,7 @@ namespace XumerTool
             using (SolidBrush b = new SolidBrush(back)) e.Graphics.FillRectangle(b, e.Bounds);
             if (e.Index < 0) return;
             DirEntry en = (DirEntry)lst.Items[e.Index];
-            ScreenFonts.Draw(e.Graphics, FormatEntry(en), lst.Font, fore, e.Bounds);
+            ScreenFonts.Draw(e.Graphics, en.ListingLine(), lst.Font, fore, e.Bounds);
 
             // icona pixel del tipo di file, in una colonna dopo il tipo (la directory resta allineata come sul C64)
             int px = Math.Max(1, (int)Math.Round(lst.ItemHeight * 0.62 / 8.0));
@@ -1541,11 +1635,6 @@ namespace XumerTool
             FileTypeIcons.Draw(e.Graphics, en.Type, x, y, px, selected ? fore : Color.Empty);
         }
 
-        static string FormatEntry(DirEntry e)
-        {
-            string name = "\"" + e.Name + "\"";
-            return e.Blocks.ToString().PadRight(5) + name.PadRight(19) + (e.Splat ? "*" : " ") + e.Type + (e.Locked ? "<" : "");
-        }
 
         void ShowEmptyScreen()
         {
@@ -1575,9 +1664,8 @@ namespace XumerTool
             {
                 if (d.ShowDialog(this) != DialogResult.OK) return;
                 bool rebuild = d.AutoConnect != AutoConnect;
-                Settings.Set("saver", d.SaverOn ? "1" : "0");
-                Settings.Set("savermode", d.SaverFull ? "full" : "dir");
-                Settings.Set("autoconnect", d.AutoConnect ? "1" : "0");
+                Settings.SetMany("saver", d.SaverOn ? "1" : "0", "savermode", d.SaverFull ? "full" : "dir",
+                                 "autoconnect", d.AutoConnect ? "1" : "0", "dirtxt", d.DirTxt ? "1" : "0");
                 if (d.FontId != ScreenFonts.Current.Id) { Settings.Set("screenfont", d.FontId); rebuild = true; }
                 if (d.ThemeName != Theme.Current)
                 {
@@ -1600,7 +1688,7 @@ namespace XumerTool
                     if (Busy) Log(msg);
                     else if (MessageBox.Show(this, msg + "\n\n" + Lang.T("Riavviare ora?"), Lang.Current == "it" ? "Lingua · Language" : "Language · Lingua",
                              MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                        BeginInvoke((Action)delegate { Application.Restart(); });
+                        BeginInvoke((Action)delegate { SingleInstance.Release(); Application.Restart(); });
                 }
             }
         }
@@ -1714,7 +1802,7 @@ namespace XumerTool
             cmbDev.SelectedIndex = dev;
             txtVice.Text = vice;
             UpdateViceState();
-            if (currentDir != null) ShowDirectory(currentDir); else ShowEmptyScreen();
+            if (currentDir != null) ShowDirectory(currentDir, viewImage); else ShowEmptyScreen();
             RenderLog();
             UpdateButtons();
             ResumeLayout(true);
@@ -1739,9 +1827,14 @@ namespace XumerTool
             cmbDev.Enabled = !busy;
             led.Powered = online;
             led.Busy = busy;
-            btnViceFile.Enabled = online && !busy;
+            btnViceFile.Enabled = (online || viewImage != null) && !busy;
             btnViceDisk.Enabled = online && !busy;
             btnViceImage.Enabled = !busy;
+            // con un'immagine aperta dal PC: si possono salvare i suoi file anche senza drive;
+            // rinomina e cancella invece agirebbero sul disco nel drive con i nomi dell'immagine
+            btnOpenImage.Enabled = !busy;
+            btnSave.Enabled = (online || viewImage != null) && !busy;
+            btnRename.Enabled = btnScratch.Enabled = online && !busy && viewImage == null;
         }
 
         // ================= log / progresso (thread-safe) =================
@@ -2022,6 +2115,8 @@ namespace XumerTool
         {
             base.OnShown(e);
             if (interactiveMode) StartViceSearch(false);
+            if (interactiveMode) SingleInstance.Listen(OpenFromOutside);   // da ora la finestra esiste e può ricevere immagini
+            if (StartupImage != null) OpenImage(StartupImage);
             if (interactiveMode && AutoConnect)
             {
                 Log(Lang.T("Collegamento automatico all'avvio (si disattiva nella scheda Adattatore)."));
@@ -2107,10 +2202,17 @@ namespace XumerTool
 
         // ================= directory e file =================
 
-        void ShowDirectory(DiskDirectory d)
+        /// <summary>Immagine disco aperta dal PC e mostrata nello schermo blu (null = si vede il disco nel drive).</summary>
+        DiskImage viewImage;
+
+        /// <summary>Mostra una directory: del disco nel drive (img = null) o di un'immagine aperta dal PC.</summary>
+        void ShowDirectory(DiskDirectory d, DiskImage img = null)
         {
             Ui(delegate
             {
+                viewImage = img;
+                Text = img != null ? AppName + " · " + Path.GetFileName(img.FilePath) : AppName;
+                UpdateButtons();
                 currentDir = d;
                 lst.BeginUpdate();
                 lst.Items.Clear();
@@ -2121,6 +2223,65 @@ namespace XumerTool
                 lblDiskHeader.Text = "\"" + d.DiskName.PadRight(16) + "\" " + d.DiskId;
                 lblFree.Text = (d.BlocksFree >= 0 ? d.BlocksFree.ToString() : "?") + Lang.T(" BLOCKS FREE.");
             });
+        }
+
+        /// <summary>Immagine da aprire appena la finestra compare (passata all'avvio).</summary>
+        public string StartupImage;
+
+        /// <summary>Messaggio da un secondo avvio (thread della pipe): apre l'immagine o porta la finestra in primo piano.</summary>
+        public void OpenFromOutside(string path)
+        {
+            Ui(delegate
+            {
+                if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+                Activate();
+                if (!string.IsNullOrEmpty(path)) OpenImage(path);
+            });
+        }
+
+        public static bool IsImageFile(string[] files)
+        {
+            if (files == null || files.Length != 1) return false;
+            string ext = Path.GetExtension(files[0]).ToLowerInvariant();
+            return (ext == ".d64" || ext == ".d71" || ext == ".d81") && File.Exists(files[0]);
+        }
+
+        void OnOpenImage(object sender, EventArgs e)
+        {
+            using (OpenFileDialog d = new OpenFileDialog())
+            {
+                d.Filter = Lang.T("Immagini disco (*.d64;*.d71;*.d81)|*.d64;*.d71;*.d81|Tutti i file|*.*");
+                d.Title = Lang.T("Apri un'immagine disco");
+                string last = Settings.Get("imagelastdir", "");
+                if (last.Length > 0 && Directory.Exists(last)) d.InitialDirectory = last;
+                if (d.ShowDialog(this) != DialogResult.OK) return;
+                OpenImage(d.FileName);
+            }
+        }
+
+        /// <summary>
+        /// Apre un'immagine D64/D71/D81 dal PC e ne mostra la directory nello schermo blu (anche senza drive).
+        /// Usata dal tassello "apri immagine", dal trascinamento e dall'apertura da Esplora risorse.
+        /// </summary>
+        public void OpenImage(string path)
+        {
+            if (Busy) { MessageBox.Show(this, Lang.T("Aspetta la fine dell'operazione in corso, poi riapri l'immagine."), Text); return; }
+            DiskImage img;
+            DiskDirectory d;
+            try { img = DiskImage.Load(path); d = img.ReadDirectory(); }
+            catch (Exception ex)
+            {
+                Log(Lang.T("ERRORE: immagine non leggibile: ") + Path.GetFileName(path) + ": " + ex.Message);
+                MessageBox.Show(this, Lang.T("Immagine non leggibile:\n") + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            Settings.Set("imagelastdir", Path.GetDirectoryName(path));
+            HideMap();
+            StopPanelSaver();
+            ShowDirectory(d, img);
+            Log(Lang.F("Immagine aperta: {0} ({1}, {2} file, {3} blocchi liberi)", path, img.Kind, d.Entries.Count, d.BlocksFree));
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         void OnDirectory(object sender, EventArgs e)
@@ -2146,7 +2307,8 @@ namespace XumerTool
 
         void OnSaveFiles(object sender, EventArgs e)
         {
-            if (drive == null || Busy) return;
+            DiskImage img = viewImage;   // con un'immagine aperta i file si leggono da lì, senza drive
+            if ((drive == null && img == null) || Busy) return;
             List<DirEntry> sel = SelectedEntries();
             if (sel.Count == 0) { MessageBox.Show(this, Lang.T("Seleziona uno o più file nella directory (premi prima \"Directory\")."), Text); return; }
             string folder = null, single = null;
@@ -2172,7 +2334,7 @@ namespace XumerTool
             {
                 foreach (DirEntry en in sel)
                 {
-                    byte[] data = drive.ReadFile(en);
+                    byte[] data = img != null ? img.ReadFile(en) : drive.ReadFile(en);
                     string path = single ?? Path.Combine(folder, SafeFileName(en.Name, en.Type));
                     File.WriteAllBytes(path, data);
                     Log(Lang.T("Salvato: ") + path);
@@ -2254,6 +2416,7 @@ namespace XumerTool
 
         void OnRename(object sender, EventArgs e)
         {
+            if (drive == null || Busy || viewImage != null) return;   // con un'immagine aperta agirebbe sul disco nel drive
             List<DirEntry> sel = SelectedEntries();
             if (sel.Count != 1) { MessageBox.Show(this, Lang.T("Seleziona un solo file."), Text); return; }
             string[] r = InputDialog.Ask(this, Lang.T("Rinomina"), new[] { Lang.T("Nuovo nome:") }, new[] { sel[0].Name }, new[] { 16 });
@@ -2263,7 +2426,7 @@ namespace XumerTool
 
         void OnScratch(object sender, EventArgs e)
         {
-            if (drive == null || Busy) return;
+            if (drive == null || Busy || viewImage != null) return;   // anche il tasto Canc: mai sul drive con i nomi dell'immagine
             List<DirEntry> sel = SelectedEntries();
             if (sel.Count == 0) { MessageBox.Show(this, Lang.T("Seleziona i file da cancellare."), Text); return; }
             if (MessageBox.Show(this, Lang.T("Cancellare definitivamente ") + sel.Count + Lang.T(" file dal disco?"), Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
@@ -2303,9 +2466,54 @@ namespace XumerTool
             Run(Lang.T("Crea immagine"), delegate
             {
                 byte[] img = drive.ReadImage(kind);
-                File.WriteAllBytes(path, img);
-                Log(Lang.T("Immagine salvata: ") + path);
+                SaveImageFile(path, img);
             }, kind);
+        }
+
+        /// <summary>Il file .txt con la directory accanto a ogni immagine creata (opzione nelle Preferenze, attiva all'inizio).</summary>
+        public static bool DirectoryTxtEnabled { get { return Settings.Get("dirtxt", "1") == "1"; } }
+
+        /// <summary>Salva un'immagine creata e, se l'opzione è attiva, il .txt con la sua directory (thread di lavoro).</summary>
+        void SaveImageFile(string path, byte[] img)
+        {
+            File.WriteAllBytes(path, img);
+            Log(Lang.T("Immagine salvata: ") + path);
+            if (!DirectoryTxtEnabled) return;
+            try
+            {
+                string txt = WriteDirectoryTxt(DiskImage.FromBytes(img, path));
+                Log(Lang.T("Directory salvata: ") + txt);
+            }
+            catch (Exception ex) { Log(Lang.T("ERRORE: directory .txt non salvata: ") + ex.Message); }
+        }
+
+        /// <summary>Scrive accanto all'immagine il .txt con la directory in stile C64; restituisce il percorso.</summary>
+        static string WriteDirectoryTxt(DiskImage img)
+        {
+            string txt = Path.ChangeExtension(img.FilePath, ".txt");
+            File.WriteAllText(txt, img.ReadDirectory().ToListing(), new System.Text.UTF8Encoding(false));
+            return txt;
+        }
+
+        /// <summary>Crea il .txt della directory per tutte le immagini di una cartella (anche quelle create prima).</summary>
+        public static void WriteDirectoryTxtForFolder(IWin32Window owner)
+        {
+            using (FolderBrowserDialog d = new FolderBrowserDialog { Description = Lang.T("Cartella con le immagini disco (.d64, .d71, .d81)") })
+            {
+                string last = Settings.Get("imagelastdir", "");
+                if (last.Length > 0 && Directory.Exists(last)) d.SelectedPath = last;
+                if (d.ShowDialog(owner) != DialogResult.OK) return;
+                int ok = 0, bad = 0;
+                System.Text.StringBuilder errors = new System.Text.StringBuilder();
+                foreach (string f in Directory.GetFiles(d.SelectedPath))
+                {
+                    if (!IsImageFile(new[] { f })) continue;
+                    try { WriteDirectoryTxt(DiskImage.Load(f)); ok++; }
+                    catch (Exception ex) { bad++; if (bad <= 5) errors.Append("\n• ").Append(Path.GetFileName(f)).Append(": ").Append(ex.Message); }
+                }
+                MessageBox.Show(owner, Lang.F("File .txt creati: {0}.", ok) + (bad > 0 ? "\n" + Lang.F("Immagini non leggibili: {0}", bad) + errors : ""),
+                    AppName, MessageBoxButtons.OK, bad > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+            }
         }
 
         /// <summary>
@@ -2358,8 +2566,7 @@ namespace XumerTool
                         img = drive.ReadImage(kind);
                     }
                 }
-                File.WriteAllBytes(path, img);
-                Log(Lang.T("Immagine salvata: ") + path);
+                SaveImageFile(path, img);
             }, kind);
         }
 
@@ -2369,6 +2576,12 @@ namespace XumerTool
             using (OpenFileDialog d = new OpenFileDialog())
             {
                 d.Filter = Lang.T("Immagini disco (*.d64;*.d71;*.d81)|*.d64;*.d71;*.d81|Tutti i file|*.*");
+                if (viewImage != null)
+                {
+                    // propone l'immagine aperta nello schermo blu
+                    d.InitialDirectory = Path.GetDirectoryName(viewImage.FilePath);
+                    d.FileName = Path.GetFileName(viewImage.FilePath);
+                }
                 if (d.ShowDialog(this) != DialogResult.OK) return;
                 path = d.FileName;
             }
@@ -2443,7 +2656,8 @@ namespace XumerTool
 
         void OnViceFile(object sender, EventArgs e)
         {
-            if (drive == null || Busy) return;
+            DiskImage img = viewImage;   // con un'immagine aperta il programma si prende da lì
+            if ((drive == null && img == null) || Busy) return;
             List<DirEntry> sel = SelectedEntries();
             if (sel.Count != 1) { MessageBox.Show(this, Lang.T("Seleziona nella directory il programma da avviare."), Text); return; }
             DirEntry en = sel[0];
@@ -2452,7 +2666,7 @@ namespace XumerTool
             if (exe == null) return;
             Run(Lang.T("Avvio in VICE"), delegate
             {
-                byte[] data = drive.ReadFile(en);
+                byte[] data = img != null ? img.ReadFile(en) : drive.ReadFile(en);
                 string path = Path.Combine(Vice.FilesDir(), SafeFileName(en.Name, "prg"));
                 File.WriteAllBytes(path, data);
                 Log(Lang.T("File salvato: ") + path);
@@ -2488,8 +2702,7 @@ namespace XumerTool
             {
                 byte[] img = drive.ReadImage(ImageKind.D64);
                 string path = Path.Combine(Vice.FilesDir(), SafeFileName(name, "d64"));
-                File.WriteAllBytes(path, img);
-                Log(Lang.T("Immagine salvata: ") + path);
+                SaveImageFile(path, img);
                 Ui(delegate { LaunchVice(exe, path); });
             }, ImageKind.D64);
         }

@@ -7,3 +7,7 @@ bin/
 Thumbs.db
 desktop.ini
 *.tmp
+
+# liste delle cose da fare: restano private, su GitHub va solo il CHANGELOG
+DA_FARE.md
+TODO.md
