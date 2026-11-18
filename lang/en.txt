@@ -1269,3 +1269,474 @@ en: N0:NAME,ID
 
 it: N0:NOME
 en: N0:NAME
+
+# 18/11/2026 – correzioni dalla revisione
+it: ricerca in corso…
+en: searching…
+
+it: Settore incompleto (traccia {0} settore {1}: {2} byte su 256)
+en: Incomplete sector (track {0} sector {1}: {2} bytes of 256)
+
+it: Attesa del drive interrotta
+en: Waiting for the drive was interrupted
+
+it: indirizzo
+en: address
+
+it: uscita
+en: exit
+
+# 18/11/2026 – mappa del disco
+it: {0} SU {1} SETTORI
+en: {0} OF {1} SECTORS
+
+it:  · {0} ERRORI
+en:  · {0} ERRORS
+
+it: CLIC PER TORNARE ALLA DIRECTORY
+en: CLICK TO GO BACK TO THE DIRECTORY
+
+it: TRACCIA {0} SETTORE {1}
+en: TRACK {0} SECTOR {1}
+
+it: DA FARE
+en: TO DO
+
+it: FATTO
+en: DONE
+
+it: LATO 1
+en: SIDE 1
+
+it: LATO 2
+en: SIDE 2
+
+it: TRACCE {0}-{1}
+en: TRACKS {0}-{1}
+
+it: ERRORE
+en: ERROR
+
+# 18/11/2026 – copia veloce sperimentale
+it: Crea immagine veloce (sperimentale)…
+en: Create fast image (experimental)…
+
+it: La copia veloce è SPERIMENTALE: non è ancora stata provata su tutti i drive.\n\n
+en: Fast copy is EXPERIMENTAL: it has not been tested on all drives yet.\n\n
+
+it: • Legge soltanto: il disco non viene mai scritto.\n
+en: • It only reads: the disk is never written.\n
+
+it: • Funziona con 1541, 1570 e 1571 (D64; D71 solo con il 1571).\n
+en: • It works with 1541, 1570 and 1571 drives (D64; D71 only with the 1571).\n
+
+it: • Se qualcosa va storto, il programma rifà la copia con il metodo normale.\n\nContinuare?
+en: • If something goes wrong, the program redoes the copy with the normal method.\n\nContinue?
+
+it: Copia veloce
+en: Fast copy
+
+it: ERRORE: copia veloce non riuscita: 
+en: ERROR: fast copy failed: 
+
+it: Rifaccio la copia con il metodo normale…
+en: Redoing the copy with the normal method…
+
+it: Il drive non risponde sulla linea CLK
+en: The drive does not respond on the CLK line
+
+it: Immagine 1541 (*.d64)|*.d64|Immagine 1571 doppia faccia (*.d71)|*.d71
+en: 1541 image (*.d64)|*.d64|1571 double-sided image (*.d71)|*.d71
+
+# 18/11/2026 – legenda dei messaggi del drive
+it: Tutto a posto: l'ultima operazione è riuscita.
+en: All good: the last operation succeeded.
+
+it: Niente da fare.
+en: Nothing to do.
+
+it: File cancellati: il primo numero dopo il messaggio dice quanti.
+en: Files deleted: the first number after the message says how many.
+
+it: Niente da fare: è la conferma di una cancellazione.
+en: Nothing to do: it confirms a deletion.
+
+it: Partizione selezionata (solo 1581).
+en: Partition selected (1581 only).
+
+it: Intestazione del blocco non trovata: il settore non si legge.
+en: Block header not found: the sector cannot be read.
+
+it: Riprova; pulisci la testina; se succede con tutti i dischi il drive va riallineato. Con Crea immagine salvi il resto del disco.
+en: Try again; clean the head; if it happens with every disk the drive needs alignment. Create image saves the rest of the disk.
+
+it: Nessun segnale di sincronismo: disco non formattato, assente o inserito male.
+en: No sync mark: the disk is unformatted, missing or badly inserted.
+
+it: Controlla il disco e chiudi bene lo sportello; un disco nuovo va prima formattato.
+en: Check the disk and close the door properly; a new disk must be formatted first.
+
+it: Blocco dati non trovato: il settore è rovinato.
+en: Data block not found: the sector is damaged.
+
+it: Riprova più volte; con Crea immagine salvi i settori buoni (l'errore resta segnato nell'immagine).
+en: Try a few times; Create image saves the good sectors (the error stays recorded in the image).
+
+it: Dati del settore corrotti (checksum errato): disco danneggiato o sporco.
+en: Sector data corrupted (bad checksum): damaged or dirty disk.
+
+it: Riprova e pulisci la testina; salva il disco con Crea immagine, poi copia i file su un disco nuovo.
+en: Try again and clean the head; save the disk with Create image, then copy the files to a new disk.
+
+it: Errore di decodifica dei dati letti: superficie rovinata o problema del drive.
+en: Error decoding the data read: damaged surface or a drive problem.
+
+it: Prova un altro disco: se l'errore resta, il drive va controllato.
+en: Try another disk: if the error remains, the drive needs checking.
+
+it: Verifica dopo la scrittura fallita: i dati scritti non corrispondono.
+en: Verify after write failed: the written data does not match.
+
+it: Il disco è consumato o difettoso: usane un altro.
+en: The disk is worn or faulty: use another one.
+
+it: Disco protetto dalla scrittura.
+en: The disk is write-protected.
+
+it: Togli l'adesivo dalla tacca laterale (o usa un disco con la tacca libera).
+en: Remove the sticker from the side notch (or use a disk with an open notch).
+
+it: Intestazione del settore corrotta (checksum errato).
+en: Sector header corrupted (bad checksum).
+
+it: Disco danneggiato: salva il possibile con Crea immagine.
+en: Damaged disk: save what you can with Create image.
+
+it: Blocco troppo lungo in scrittura: disco rovinato o velocità del motore sbagliata.
+en: Block too long while writing: damaged disk or wrong motor speed.
+
+it: Prova un altro disco; se succede sempre, il drive va regolato.
+en: Try another disk; if it always happens, the drive needs adjusting.
+
+it: L'ID del disco non è quello atteso: disco cambiato senza inizializzarlo, o intestazione rovinata.
+en: The disk ID is not the expected one: disk swapped without initializing, or damaged header.
+
+it: Rileggi la Directory (o invia I0) e riprova.
+en: Read the Directory again (or send I0) and retry.
+
+it: Comando non capito dal drive.
+en: The drive did not understand the command.
+
+it: Controlla come è scritto il comando (vedi Comandi pronti).
+en: Check how the command is written (see Ready commands).
+
+it: Comando sconosciuto.
+en: Unknown command.
+
+it: Controlla la prima lettera del comando.
+en: Check the first letter of the command.
+
+it: Comando troppo lungo (oltre 58 caratteri).
+en: Command too long (over 58 characters).
+
+it: Accorcia il comando o il nome del file.
+en: Shorten the command or the file name.
+
+it: Nome di file non valido (es. * o ? dove non sono ammessi).
+en: Invalid file name (e.g. * or ? where they are not allowed).
+
+it: Usa i caratteri jolly solo per directory, cancellazione e caricamento.
+en: Use wildcards only for directory, delete and load.
+
+it: Nome del file mancante.
+en: File name missing.
+
+it: Aggiungi il nome dopo i due punti (es. S0:NOME).
+en: Add the name after the colon (e.g. S0:NAME).
+
+it: Comando non valido per il canale comandi.
+en: Invalid command for the command channel.
+
+it: Controlla il comando.
+en: Check the command.
+
+it: File relativo (REL): record oltre la fine del file.
+en: Relative file (REL): record past the end of the file.
+
+it: Normale quando si allunga un file REL; altrimenti controlla il numero del record.
+en: Normal when extending a REL file; otherwise check the record number.
+
+it: File relativo (REL): dati più lunghi del record.
+en: Relative file (REL): data longer than the record.
+
+it: Accorcia i dati o usa record più lunghi.
+en: Shorten the data or use longer records.
+
+it: File relativo (REL): il record non sta più sul disco.
+en: Relative file (REL): the record no longer fits on the disk.
+
+it: Libera spazio o usa un altro disco.
+en: Free some space or use another disk.
+
+it: Il file è ancora aperto in scrittura.
+en: The file is still open for writing.
+
+it: Chiudi il file; i file rimasti aperti (segnati con *) si sistemano con Valida.
+en: Close the file; files left open (marked with *) are fixed with Validate.
+
+it: Il file non è aperto.
+en: The file is not open.
+
+it: Apri il file prima di leggerlo o scriverlo; un Reset bus rimette tutto a posto.
+en: Open the file before reading or writing it; a bus Reset puts everything back in order.
+
+it: File non trovato.
+en: File not found.
+
+it: Controlla il nome con la Directory (maiuscole, spazi); il jolly * aiuta (es. NOME*).
+en: Check the name with Directory (capitals, spaces); the * wildcard helps (e.g. NAME*).
+
+it: Esiste già un file con quel nome.
+en: A file with that name already exists.
+
+it: Scegli un altro nome, oppure cancella o rinomina prima quello vecchio.
+en: Choose another name, or delete or rename the old one first.
+
+it: Il tipo del file (PRG, SEQ…) non è quello richiesto.
+en: The file type (PRG, SEQ…) is not the one requested.
+
+it: Apri il file con il suo tipo, come appare nella directory.
+en: Open the file with its own type, as shown in the directory.
+
+it: Il blocco richiesto è già occupato (comando B-A).
+en: The requested block is already in use (B-A command).
+
+it: Il numero dopo il messaggio indica il prossimo blocco libero.
+en: The number after the message shows the next free block.
+
+it: Traccia o settore inesistenti: comando sbagliato o collegamenti dei file rovinati.
+en: Track or sector does not exist: wrong command or damaged file links.
+
+it: Controlla il comando; se capita leggendo un file, prova Valida.
+en: Check the command; if it happens while reading a file, try Validate.
+
+it: Traccia o settore di sistema non validi.
+en: Invalid system track or sector.
+
+it: Disco danneggiato o comando sbagliato: prova Valida.
+en: Damaged disk or wrong command: try Validate.
+
+it: Nessun canale libero nel drive: troppi file aperti.
+en: No free channel in the drive: too many open files.
+
+it: Chiudi i file aperti; Reset bus libera tutti i canali.
+en: Close the open files; bus Reset frees all channels.
+
+it: La mappa dei blocchi (BAM) non corrisponde al disco.
+en: The block map (BAM) does not match the disk.
+
+it: Usa Valida (V0); se il problema resta, salva i file e riformatta.
+en: Use Validate (V0); if the problem remains, save the files and reformat.
+
+it: Disco pieno, oppure directory piena (144 file su 1541/1571).
+en: Disk full, or directory full (144 files on 1541/1571).
+
+it: Cancella qualche file o usa un altro disco.
+en: Delete some files or use another disk.
+
+it: Messaggio di accensione o di reset del drive: indica la versione del DOS e il modello.
+en: Drive power-on or reset message: it shows the DOS version and the model.
+
+it: Niente da fare: non è un errore.
+en: Nothing to do: it is not an error.
+
+it: Drive non pronto: manca il disco o lo sportello è aperto (per le D71 serve un 1571).
+en: Drive not ready: no disk or the door is open (D71 needs a 1571).
+
+it: Inserisci il disco, chiudi lo sportello e riprova.
+en: Insert the disk, close the door and retry.
+
+it: Formattazione non riuscita (1571/1581).
+en: Formatting failed (1571/1581).
+
+it: Riprova con un altro disco.
+en: Try again with another disk.
+
+it: Errore del controller del drive (1571/1581).
+en: Drive controller error (1571/1581).
+
+it: Spegni e riaccendi il drive; se resta, il drive va controllato.
+en: Switch the drive off and on; if it remains, the drive needs checking.
+
+it: Partizione non valida (solo 1581).
+en: Invalid partition (1581 only).
+
+it: Controlla il comando della partizione.
+en: Check the partition command.
+
+it: Comandi pronti
+en: Ready commands
+
+it: Messaggi di errore
+en: Error messages
+
+it: Cosa significano i messaggi del drive e cosa fare. Nel registro la spiegazione compare da sola sotto ogni errore.
+en: What the drive messages mean and what to do. In the log the explanation appears by itself under each error.
+
+
+# 18/11/2026 – barra a nastro
+it: directory
+en: directory
+
+it: valida
+en: validate
+
+it: formatta
+en: format
+
+it: salva sul PC
+en: save to PC
+
+it: salva
+en: save
+
+it: scrivi su disco
+en: write to disk
+
+it: scrivi
+en: write
+
+it: rinomina
+en: rename
+
+it: cancella
+en: delete
+
+it: crea immagine
+en: create image
+
+it: crea
+en: create
+
+it: normale
+en: normal
+
+it: veloce
+en: fast
+
+it: scrivi immagine
+en: write image
+
+
+# 18/11/2026 – scheda Internet Archive
+it: Accedi con il tuo account archive.org
+en: Sign in with your archive.org account
+
+it: Email
+en: Email
+
+it: Password
+en: Password
+
+it: Accedi
+en: Sign in
+
+it: Oppure con le chiavi S3
+en: Or with the S3 keys
+
+it: Chiave di accesso
+en: Access key
+
+it: Chiave segreta
+en: Secret key
+
+it: Salva chiavi
+en: Save keys
+
+it: Pagina delle chiavi
+en: Keys page
+
+it: Crea un account
+en: Create an account
+
+it: Account Internet Archive
+en: Internet Archive account
+
+it: Il mio archivio
+en: My archive
+
+it: Le chiavi di caricamento sono salvate su questo PC, cifrate. Il caricamento delle immagini disco arriverà nella prossima versione.
+en: The upload keys are saved on this PC, encrypted. Uploading disk images will come in the next version.
+
+it: Cos'è
+en: What it is
+
+it: Internet Archive (archive.org) è una biblioteca digitale senza scopo di lucro: lì potrai conservare le immagini dei tuoi dischi e renderle disponibili a tutti.
+en: Internet Archive (archive.org) is a non-profit digital library: there you will be able to preserve your disk images and make them available to everyone.
+
+it: I tuoi dati
+en: Your data
+
+it: La password serve solo per ottenere dal sito le chiavi di caricamento e non viene salvata. Le chiavi restano su questo PC, cifrate con la protezione di Windows del tuo utente; puoi rigenerarle quando vuoi dalla pagina delle chiavi.
+en: The password is only used to get the upload keys from the site and is never saved. The keys stay on this PC, encrypted with your Windows user's protection; you can regenerate them at any time from the keys page.
+
+it: Collegato come {0}
+en: Connected as {0}
+
+it: Collegato con le chiavi S3
+en: Connected with the S3 keys
+
+it: Collegamento ad archive.org in corso…
+en: Connecting to archive.org…
+
+it: Scrivi email e password del tuo account archive.org.
+en: Enter the email and password of your archive.org account.
+
+it: Collegato. Le chiavi di caricamento sono salvate, cifrate.
+en: Connected. The upload keys are saved, encrypted.
+
+it: Internet Archive: account collegato
+en: Internet Archive: account connected
+
+it: Incolla tutte e due le chiavi (accesso e segreta).
+en: Paste both keys (access and secret).
+
+it: Chiavi valide e salvate, cifrate.
+en: Keys valid and saved, encrypted.
+
+it: Internet Archive: account collegato con le chiavi S3
+en: Internet Archive: account connected with the S3 keys
+
+it: Scollegare l'account Internet Archive? Le chiavi salvate su questo PC verranno cancellate (sul sito non cambia nulla).
+en: Disconnect the Internet Archive account? The keys saved on this PC will be deleted (nothing changes on the site).
+
+it: Account scollegato: le chiavi sono state cancellate da questo PC.
+en: Account disconnected: the keys have been deleted from this PC.
+
+it: Internet Archive: account scollegato
+en: Internet Archive: account disconnected
+
+it: archive.org non risponde: controlla la connessione a internet.
+en: archive.org does not respond: check your internet connection.
+
+it: Nessun account archive.org con questa email.
+en: No archive.org account with this email.
+
+it: Password errata.
+en: Wrong password.
+
+it: L'account non è ancora verificato: apri l'email di conferma di archive.org e riprova.
+en: The account is not verified yet: open the confirmation email from archive.org and try again.
+
+it: L'account è bloccato: controlla sul sito archive.org.
+en: The account is locked: check on the archive.org site.
+
+it: Accesso non riuscito
+en: Sign-in failed
+
+it: Il sito non ha restituito le chiavi di caricamento: copiale dalla pagina delle chiavi.
+en: The site did not return the upload keys: copy them from the keys page.
+
+it: Chiavi non valide: ricopiale dalla pagina delle chiavi di archive.org.
+en: Invalid keys: copy them again from the archive.org keys page.
+

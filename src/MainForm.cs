@@ -88,6 +88,17 @@ namespace XumerTool
                     if (a.StartsWith("w=")) f.Width = Math.Max(f.MinimumSize.Width, int.Parse(a.Substring(2)));
                 f.Demo(args.Length >= 4 ? int.Parse(args[3]) : 1);
                 if (args.Length >= 5 && args[4] == "saver") { Application.DoEvents(); f.DemoPanelSaver(4.0f); }
+                // iaon: scheda Internet Archive "collegata" con un nome di esempio (nulla viene salvato)
+                if (args.Length >= 5 && args[4] == "iaon")
+                {
+                    InternetArchive.Access = "esempio"; InternetArchive.Secret = "esempio"; InternetArchive.ScreenName = "darkwave3D";
+                    f.RefreshArchiveStatePublic();
+                }
+                // errors: la legenda dei messaggi nella scheda Comandi DOS, con un esempio nel registro
+                if (args.Length >= 5 && args[4] == "errors") f.DemoErrors();
+                // map / map71 / map81: la mappa del disco a metà di una copia
+                if (args.Length >= 5 && args[4].StartsWith("map"))
+                    f.DemoMap(args[4] == "map71" ? ImageKind.D71 : args[4] == "map81" ? ImageKind.D81 : ImageKind.D64);
                 for (int i = 0; i < 5; i++) { Application.DoEvents(); Thread.Sleep(60); }
                 using (Bitmap bmp = new Bitmap(f.Width, f.Height))
                 {
@@ -345,8 +356,8 @@ namespace XumerTool
             int fw = ExternalTools.FirmwareDownloaded();
             lblFwState.Text = fw == 2 ? Lang.T("✓ entrambe le versioni scaricate") : fw == 1 ? Lang.T("una versione scaricata") : Lang.T("non ancora scaricati");
             lblFwState.ForeColor = fw == 2 ? Theme.LogReply : Theme.HeaderMuted;
-            string vice = Vice.Find();
-            lblViceTool.Text = vice != null ? Lang.T("✓ trovato") : Lang.T("non trovato sul PC");
+            string vice = Vice.Saved();
+            lblViceTool.Text = vice != null ? Lang.T("✓ trovato") : viceScanning ? Lang.T("ricerca in corso…") : Lang.T("non trovato sul PC");
             lblViceTool.ForeColor = vice != null ? Theme.LogReply : Theme.HeaderMuted;
         }
 
@@ -406,12 +417,11 @@ namespace XumerTool
             if (MessageBox.Show(this, Lang.F("Scrivere il firmware \"{0}\" sul Pro Micro?\n\nScollega prima il cavo IEC dal drive. L'operazione dura circa 20 secondi.", label),
                 Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-            bool wasConnected = xum != null;
-            if (wasConnected) { drive = null; }
+            // l'adattatore passa al lavoro del firmware: l'app non lo considera più collegato
             Xum1541 current = xum;
-            xum = null;
+            xum = null; drive = null;
             SelectTab(TAB_LOG);
-            if (drive == null) SetState("FIRMWARE", Lang.T("scrittura del firmware in corso"));
+            SetState("FIRMWARE", Lang.T("scrittura del firmware in corso"));
             Run(Lang.T("Firmware"), delegate
             {
                 string hex;
@@ -556,10 +566,13 @@ namespace XumerTool
                    btnViceFile, btnViceImage, btnViceDisk;
         TextBox txtCmd, txtVice, txtViceDir;
         RichTextBox txtLog;
-        Led led;
+        DriveLed led;
+        DiskMap diskMap;
+        bool mapShown;
         Label lblState, lblStateSub, lblDiskNo, lblDiskHeader, lblFree, lblReady, lblCursor, lblViceState, lblProgress;
         Panel c64Frame;
-        ListBox lst, lstDos;
+        ListBox lst, lstDos, lstErr;
+        Segmented dosView;   // Comandi pronti · Messaggi di errore
         SlimProgress progress;
         SplitContainer split;
         TabButton[] tabs;
@@ -567,7 +580,7 @@ namespace XumerTool
         TableLayoutPanel cmdBar;
         Panel[] tabPages;
         int currentTab = TAB_LOG;
-        const int TAB_ADAPTER = 0, TAB_LOG = 1, TAB_DOS = 2, TAB_VICE = 3, TAB_GAMES = 4;
+        const int TAB_ADAPTER = 0, TAB_LOG = 1, TAB_DOS = 2, TAB_VICE = 3, TAB_ARCHIVE = 4, TAB_GAMES = 5;
         DiskDirectory currentDir;
         readonly List<Button> driveButtons = new List<Button>();
         readonly List<KeyValuePair<string, string>> logEntries = new List<KeyValuePair<string, string>>();
@@ -578,7 +591,6 @@ namespace XumerTool
         FlowLayoutPanel toolBar, stateTextBox;
         Label lblSubtitle, lblDevCaption;
         IconButton btnInfo;
-        readonly List<IconButton> toolButtons = new List<IconButton>();
         int adaptedWidth = -1, headerLevel;
         bool adapting;
 
@@ -586,6 +598,7 @@ namespace XumerTool
 
         public MainForm(bool interactive)
         {
+            interactiveMode = interactive;   // prima di costruire le schede: negli screenshot niente percorsi personali
             Text = AppName;
             Icon = Theme.MakeAppIcon();
             Font = new Font("Segoe UI", 9.5f);
@@ -599,7 +612,6 @@ namespace XumerTool
             Log(Lang.T("Pronto. Collega l'adattatore, accendi il drive e premi \"Collega\"."));
             Log(Lang.T("Nota: chiudi la pagina web del programma se è collegata all'adattatore."));
 
-            interactiveMode = interactive;
             if (interactive) { Vice.RemoveOldTempDir(); StartIdleWatch(); }
 
             blink = new System.Windows.Forms.Timer { Interval = 530 };
@@ -609,21 +621,166 @@ namespace XumerTool
 
         // ================= costruzione interfaccia =================
 
-        IconButton ToolButton(Control parent, string glyph, string text, string shortText, EventHandler click, bool needsDrive)
+        // ================= barra a nastro =================
+        // Sezione → fascia del titolo (colore vivo) → celle: fascia col nome del comando (colore medio)
+        // e sotto le icone, con una didascalia piccola solo quando un comando ha più varianti.
+
+        /// <summary>
+        /// Un comando della barra a nastro. Singolo: un solo tassello cliccabile con la fascia del nome dentro.
+        /// Con varianti (es. crea immagine normale/veloce): fascia del nome sopra e tasselli separati sotto.
+        /// </summary>
+        class RibbonCell
         {
-            IconButton b = new IconButton(glyph, text, ButtonKind.Toolbar) { LongText = text, ShortText = shortText };
-            toolButtons.Add(b);
-            if (parent.Tag is Color)
+            public string Long, Short;
+            public IconButton Tile;                  // comando singolo
+            public Label Band;                       // comando con varianti: fascia del nome
+            public FlowLayoutPanel Row;              // … e riga dei suoi tasselli
+            public List<IconButton> Variants = new List<IconButton>();
+        }
+        readonly List<RibbonCell> ribbonCells = new List<RibbonCell>();
+
+        void BuildRibbon(FlowLayoutPanel toolbar)
+        {
+            Color cd = Theme.SectionDisk, cf = Theme.SectionFile, ci = Theme.SectionImage;
+            FlowLayoutPanel gDisk = RibbonGroup(toolbar, Lang.T("Disco"), cd);
+            btnDir = RibbonTile(gDisk, Lang.T("directory"), null, G_REFRESH, Lang.T("Directory"), OnDirectory, cd, cd);
+            btnValidate = RibbonTile(gDisk, Lang.T("valida"), null, G_CHECK, Lang.T("Valida"), OnValidate, cd, cd);
+            // formatta cancella tutto il disco: triangolo di pericolo (Segoe "Warning") invece della gomma
+            btnFormat = RibbonTile(gDisk, Lang.T("formatta"), null, char.ConvertFromUtf32(0xE7BA), Lang.T("Formatta…"), OnFormat, cd, Theme.Danger);
+
+            FlowLayoutPanel gFile = RibbonGroup(toolbar, Lang.T("File"), cf);
+            btnSave = RibbonTile(gFile, Lang.T("salva sul PC"), Lang.T("salva"), G_DOWNLOAD, Lang.T("Salva sul PC…"), OnSaveFiles, cf, cf);
+            btnWrite = RibbonTile(gFile, Lang.T("scrivi su disco"), Lang.T("scrivi"), G_UPLOAD, Lang.T("Scrivi su disco…"), OnWriteFiles, cf, cf);
+            btnRename = RibbonTile(gFile, Lang.T("rinomina"), null, G_RENAME, Lang.T("Rinomina…"), OnRename, cf, cf);
+            btnScratch = RibbonTile(gFile, Lang.T("cancella"), null, G_DELETE, Lang.T("Cancella"), OnScratch, cf, Theme.Danger);
+
+            FlowLayoutPanel gImg = RibbonGroup(toolbar, Lang.T("Immagini disco"), ci);
+            RibbonCell create = RibbonMulti(gImg, Lang.T("crea immagine"), Lang.T("crea"), ci);
+            btnDiskToImg = RibbonVariant(create, G_SAVE, Lang.T("normale"), Lang.T("Crea immagine…"), OnDiskToImage, ci, ci);
+            IconButton fast = RibbonVariant(create, G_SAVE, Lang.T("veloce"), Lang.T("Crea immagine veloce (sperimentale)…"), OnDiskToImageFast, ci, ci);
+            fast.BoltBadge = true;
+            btnImgToDisk = RibbonTile(gImg, Lang.T("scrivi immagine"), Lang.T("scrivi"), G_UPLOAD, Lang.T("Scrivi immagine…"), OnImageToDisk, ci, ci);
+            // l'ultimo tassello di ogni sezione arriva fino al bordo: allineato con la fascia del titolo
+            foreach (FlowLayoutPanel g in new[] { gDisk, gFile, gImg })
             {
-                Color c = (Color)parent.Tag;
-                b.IconColor = c;
-                b.HoverColor = Theme.Blend(c, Theme.Surface, 0.75f);
-                b.PressedColor = Theme.Blend(c, Theme.Surface, 0.62f);
+                Control last = g.Controls[g.Controls.Count - 1];
+                last.Margin = new Padding(last.Margin.Left, last.Margin.Top, 0, last.Margin.Bottom);
             }
+            SizeRibbonCells();
+        }
+
+        /// <summary>Sezione: fascia del titolo e, sotto, i tasselli separati da una linea del colore di fondo.</summary>
+        FlowLayoutPanel RibbonGroup(FlowLayoutPanel toolbar, string caption, Color color)
+        {
+            FlowLayoutPanel row = Group(toolbar, caption, color);
+            row.Margin = new Padding(0);          // i tasselli partono subito sotto la fascia del titolo
+            row.BackColor = Theme.Surface;        // gli spazi tra i tasselli fanno da separatori
+            TableLayoutPanel g = row.Parent as TableLayoutPanel;
+            if (g != null) { g.BackColor = Theme.Surface; g.Padding = new Padding(0); }
+            return row;
+        }
+
+        static Color BandOf(Color c) { return Theme.Blend(c, Theme.Surface, Theme.Dark ? 0.70f : 0.66f); }
+        static Color BodyOf(Color c) { return Theme.Blend(c, Theme.Surface, 0.90f); }
+
+        IconButton NewRibbonButton(string glyph, string caption, string tooltip, EventHandler click, Color section, Color iconColor)
+        {
+            IconButton b = new IconButton(glyph, caption ?? "", ButtonKind.Ribbon)
+            {
+                IconColor = iconColor, BandColor = BandOf(section), BodyColor = BodyOf(section),
+                HoverColor = Theme.Blend(section, Theme.Surface, Theme.Dark ? 0.80f : 0.78f),
+                PressedColor = Theme.Blend(section, Theme.Surface, Theme.Dark ? 0.70f : 0.66f),
+                Margin = new Padding(0, 0, Theme.S(2), 0)
+            };
+            IconButton.Tips.SetToolTip(b, tooltip);
             b.Click += click;
-            parent.Controls.Add(b);
-            if (needsDrive) driveButtons.Add(b);
+            driveButtons.Add(b);
             return b;
+        }
+
+        /// <summary>Comando singolo: tutto il tassello (nome e icona) è un unico pulsante.</summary>
+        IconButton RibbonTile(FlowLayoutPanel group, string caption, string shortCaption, string glyph, string tooltip, EventHandler click, Color section, Color iconColor)
+        {
+            IconButton b = NewRibbonButton(glyph, null, tooltip, click, section, iconColor);
+            b.Header = caption;
+            group.Controls.Add(b);
+            ribbonCells.Add(new RibbonCell { Long = caption, Short = shortCaption ?? caption, Tile = b });
+            return b;
+        }
+
+        /// <summary>Comando con varianti: fascia del nome che copre tutti i tasselli sottostanti.</summary>
+        RibbonCell RibbonMulti(FlowLayoutPanel group, string caption, string shortCaption, Color section)
+        {
+            TableLayoutPanel cell = new TableLayoutPanel
+            {
+                ColumnCount = 1, RowCount = 2, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, BackColor = Theme.Surface,
+                Margin = new Padding(0, 0, Theme.S(2), 0), Padding = new Padding(0)
+            };
+            Label band = new Label
+            {
+                Text = caption, AutoSize = false, Height = IconButton.BandHeight, TextAlign = ContentAlignment.MiddleCenter, UseMnemonic = false,
+                BackColor = BandOf(section), ForeColor = Theme.Text, Font = IconButton.BandFont, Margin = new Padding(0)
+            };
+            FlowLayoutPanel row = new FlowLayoutPanel { AutoSize = true, WrapContents = false, BackColor = Theme.Surface, Margin = new Padding(0), Padding = new Padding(0) };
+            cell.Controls.Add(band, 0, 0);
+            cell.Controls.Add(row, 0, 1);
+            group.Controls.Add(cell);
+            RibbonCell rc = new RibbonCell { Long = caption, Short = shortCaption ?? caption, Band = band, Row = row };
+            band.Click += delegate { if (rc.Variants.Count > 0 && rc.Variants[0].Enabled) rc.Variants[0].PerformClick(); };
+            ribbonCells.Add(rc);
+            return rc;
+        }
+
+        IconButton RibbonVariant(RibbonCell rc, string glyph, string caption, string tooltip, EventHandler click, Color section, Color iconColor)
+        {
+            IconButton b = NewRibbonButton(glyph, caption, tooltip, click, section, iconColor);
+            b.AutoSize = false;
+            rc.Row.Controls.Add(b);
+            rc.Variants.Add(b);
+            return b;
+        }
+
+        /// <summary>Nei comandi con varianti, fascia e tasselli occupano la stessa larghezza (i tasselli si allargano in parti uguali).</summary>
+        void SizeRibbonCells()
+        {
+            int gap = Theme.S(2);
+            foreach (RibbonCell rc in ribbonCells)
+            {
+                if (rc.Band == null) continue;
+                int n = rc.Variants.Count;
+                int bandW = TextRenderer.MeasureText(rc.Band.Text, IconButton.BandFont, Size.Empty, TextFormatFlags.NoPadding).Width + Theme.S(32);
+                int tiles = 0;
+                foreach (IconButton b in rc.Variants) tiles += b.GetPreferredSize(Size.Empty).Width;
+                tiles += gap * (n - 1);
+                int total = Math.Max(bandW, tiles);
+                int each = n > 0 ? (total - gap * (n - 1)) / n : 0;
+                for (int i = 0; i < n; i++)
+                {
+                    IconButton b = rc.Variants[i];
+                    int w = i == n - 1 ? total - (each + gap) * (n - 1) : each;   // l'ultimo prende i pixel avanzati
+                    b.Size = new Size(w, IconButton.RibbonBodyHeight);
+                    b.Margin = new Padding(0, 0, i == n - 1 ? 0 : gap, 0);
+                }
+                rc.Band.Width = total;
+            }
+        }
+
+        /// <summary>Barra a nastro più stretta: 0 tutto · 1 nomi brevi · 2 senza didascalie sotto le icone.</summary>
+        void SetRibbonLevel(int l)
+        {
+            if (ribbonCells.Count == 0) return;
+            foreach (RibbonCell rc in ribbonCells)
+            {
+                string name = l >= 1 ? rc.Short : rc.Long;
+                if (rc.Tile != null) rc.Tile.Header = name;
+                if (rc.Band != null) rc.Band.Text = name;
+                foreach (IconButton b in rc.Variants)
+                {
+                    if (b.LongText == null) b.LongText = b.Text;
+                    b.Text = l >= 2 ? "" : b.LongText;
+                }
+            }
+            SizeRibbonCells();
         }
 
         /// <summary>Sezione della barra strumenti: fascia del titolo nel colore vivo, sfondo tenue dello stesso colore.</summary>
@@ -633,11 +790,12 @@ namespace XumerTool
             TableLayoutPanel g = new TableLayoutPanel
             {
                 ColumnCount = 1, RowCount = 2, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, BackColor = back,
-                Margin = new Padding(0, 0, Theme.S(10), 0), Padding = new Padding(0, 0, 0, Theme.S(4))
+                Margin = new Padding(0, 0, Theme.S(4), 0), Padding = new Padding(0, 0, 0, Theme.S(4))
             };
             g.Controls.Add(new Label
             {
                 Text = caption.ToUpperInvariant(), AutoSize = true, Dock = DockStyle.Fill, BackColor = color, ForeColor = Theme.SectionCaptionText,
+                TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font("Segoe UI", 7.5f, FontStyle.Bold), Margin = new Padding(0), Padding = new Padding(Theme.S(10), Theme.S(3), Theme.S(10), Theme.S(3))
             }, 0, 0);
             FlowLayoutPanel row = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(Theme.S(4), Theme.S(4), Theme.S(4), 0), BackColor = back, Tag = color };
@@ -723,12 +881,12 @@ namespace XumerTool
                 }
             };
             header.Controls.Add(btnInfo, 6, 0);
-            btnTheme = new IconButton(char.ConvertFromUtf32(0xE713), Lang.T("Preferenze"), ButtonKind.Header) { Anchor = AnchorStyles.Right, Margin = new Padding(0, 0, Theme.S(16), 0) };
+            btnTheme = new IconButton(char.ConvertFromUtf32(0xE713), Lang.T("Preferenze"), ButtonKind.Header) { Anchor = AnchorStyles.Right, Margin = new Padding(0, 0, Theme.S(12), 0) };
             btnTheme.Click += OnPreferences;
             header.Controls.Add(btnTheme, 7, 0);
 
             FlowLayoutPanel state = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Anchor = AnchorStyles.Right };
-            led = new Led { Margin = new Padding(0, Theme.S(10), Theme.S(8), 0) };
+            led = new DriveLed { Margin = new Padding(0, Theme.S(5), Theme.S(8), 0) };
             state.Controls.Add(led);
             stateTextBox = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0) };
             lblState = new Label { Text = stateText, AutoSize = true, ForeColor = Theme.HeaderText, Font = new Font("Segoe UI Semibold", 10f), Margin = new Padding(0) };
@@ -738,22 +896,9 @@ namespace XumerTool
             header.Controls.Add(state, 8, 0);
 
             // ---------- barra strumenti ----------
-            FlowLayoutPanel toolbar = toolBar = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Theme.Surface, WrapContents = true, Padding = new Padding(Theme.S(10), Theme.S(8), Theme.S(10), Theme.S(8)) };
-            toolButtons.Clear();
-            FlowLayoutPanel gDisk = Group(toolbar, Lang.T("Disco"), Theme.SectionDisk);
-            btnDir = ToolButton(gDisk, G_REFRESH, Lang.T("Directory"), null, OnDirectory, true);
-            btnValidate = ToolButton(gDisk, G_CHECK, Lang.T("Valida"), null, OnValidate, true);
-            btnFormat = ToolButton(gDisk, G_ERASE, Lang.T("Formatta…"), Lang.T("Formatta"), OnFormat, true);
-            btnFormat.IconColor = Theme.Danger;
-            FlowLayoutPanel gFile = Group(toolbar, Lang.T("File"), Theme.SectionFile);
-            btnSave = ToolButton(gFile, G_DOWNLOAD, Lang.T("Salva sul PC…"), Lang.T("Salva"), OnSaveFiles, true);
-            btnWrite = ToolButton(gFile, G_UPLOAD, Lang.T("Scrivi su disco…"), Lang.T("Scrivi"), OnWriteFiles, true);
-            btnRename = ToolButton(gFile, G_RENAME, Lang.T("Rinomina…"), Lang.T("Rinomina"), OnRename, true);
-            btnScratch = ToolButton(gFile, G_DELETE, Lang.T("Cancella"), null, OnScratch, true);
-            btnScratch.IconColor = Theme.Danger;
-            FlowLayoutPanel gImg = Group(toolbar, Lang.T("Immagini disco"), Theme.SectionImage);
-            btnDiskToImg = ToolButton(gImg, G_SAVE, Lang.T("Crea immagine…"), Lang.T("Crea"), OnDiskToImage, true);
-            btnImgToDisk = ToolButton(gImg, G_UPLOAD, Lang.T("Scrivi immagine…"), Lang.T("Scrivi"), OnImageToDisk, true);
+            FlowLayoutPanel toolbar = toolBar = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Theme.Surface, WrapContents = true, Padding = new Padding(Theme.S(8), Theme.S(8), Theme.S(8), Theme.S(8)) };
+            ribbonCells.Clear();
+            BuildRibbon(toolbar);
 
             Panel toolbarLine = new Panel { Dock = DockStyle.Top, Height = 1, BackColor = Theme.Border };
 
@@ -801,6 +946,11 @@ namespace XumerTool
             panelSaver = null;
             c64Frame = new Panel { Dock = DockStyle.Fill, BackColor = Theme.C64Frame, Padding = new Padding(Theme.S(22), Theme.S(18), Theme.S(22), Theme.S(18)) };
             c64Frame.Controls.Add(screen);
+            // mappa del disco: prende il posto della directory durante le copie di immagini
+            diskMap = new DiskMap { Dock = DockStyle.Fill, Visible = false, Padding = screen.Padding };
+            diskMap.Click += delegate { if (!Busy) HideMap(); };
+            c64Frame.Controls.Add(diskMap);
+            mapShown = false;
 
             // ---------- console: comando DOS + schede ----------
             cmdBar = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Theme.Header, ColumnCount = 4, Padding = new Padding(Theme.S(10), Theme.S(6), Theme.S(10), Theme.S(6)) };
@@ -824,10 +974,12 @@ namespace XumerTool
             cmdBar.Controls.Add(btnStatus, 3, 0);
 
             // barra delle schede
-            tabBar = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Theme.LogBack, ColumnCount = 7, Padding = new Padding(Theme.S(10), Theme.S(2), Theme.S(10), 0) };
-            for (int i = 0; i < 7; i++) tabBar.ColumnStyles.Add(new ColumnStyle(i == 5 ? SizeType.Percent : SizeType.AutoSize, 100));
+            // schede (Giochi resta sempre l'ultima), poi uno spazio elastico e "Pulisci registro"
+            tabBar = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, BackColor = Theme.LogBack, ColumnCount = 8, Padding = new Padding(Theme.S(10), Theme.S(2), Theme.S(10), 0) };
+            for (int i = 0; i < 8; i++) tabBar.ColumnStyles.Add(new ColumnStyle(i == 6 ? SizeType.Percent : SizeType.AutoSize, 100));
             tabs = new[] { new TabButton(Lang.T("Adattatore"), Theme.TabAdapter, G_USB), new TabButton(Lang.T("Registro"), Theme.TabLog, G_LIST),
                            new TabButton(Lang.T("Comandi DOS"), Theme.TabDos, G_PROMPT), new TabButton("VICE", Theme.TabVice, G_MONITOR),
+                           new TabButton("Internet Archive", Theme.TabArchive, char.ConvertFromUtf32(0xE753)),
                            new TabButton(Lang.T("Giochi"), Theme.TabGames, G_GAME) };
             for (int i = 0; i < tabs.Length; i++)
             {
@@ -835,10 +987,10 @@ namespace XumerTool
                 tabs[i].Click += delegate { SelectTab(idx); };
                 tabBar.Controls.Add(tabs[i], i, 0);
             }
-            tabBar.Controls.Add(new Panel { Width = 1, Height = 1, BackColor = Theme.LogBack }, 5, 0);
+            tabBar.Controls.Add(new Panel { Width = 1, Height = 1, BackColor = Theme.LogBack }, 6, 0);
             btnClear = new IconButton(G_CLEAR, Lang.T("Pulisci registro"), ButtonKind.Header) { Anchor = AnchorStyles.Right };
             btnClear.Click += delegate { logEntries.Clear(); txtLog.Clear(); };
-            tabBar.Controls.Add(btnClear, 6, 0);
+            tabBar.Controls.Add(btnClear, 7, 0);
             tabLine = new Panel { Dock = DockStyle.Top, Height = Theme.S(3), BackColor = Theme.TabLog };
 
             // scheda 0: registro
@@ -866,22 +1018,56 @@ namespace XumerTool
             };
             lstDos.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter && lstDos.SelectedItem != null) { e.SuppressKeyPress = true; InsertDosCommand((DosCommand)lstDos.SelectedItem); } };
             Panel pageDos = new Panel { Dock = DockStyle.Fill, BackColor = Theme.LogBack, Padding = new Padding(Theme.S(10), Theme.S(4), Theme.S(4), Theme.S(4)) };
-            pageDos.Controls.Add(lstDos);
-            pageDos.Controls.Add(new Label
+            // legenda dei messaggi del drive: numero, testo, significato e soluzione
+            lstErr = new ListBox
             {
-                Dock = DockStyle.Top, AutoSize = false, Height = Theme.S(24), ForeColor = Theme.HeaderMuted, TextAlign = ContentAlignment.MiddleLeft,
-                Text = Lang.T("Clicca un comando per scriverlo nella riga \"Comando DOS\": completa le parti in maiuscolo (NOME, ID…) e premi Invio.")
-            });
+                Dock = DockStyle.Fill, BorderStyle = BorderStyle.None, DrawMode = DrawMode.OwnerDrawFixed, Visible = false,
+                BackColor = Theme.LogBack, ForeColor = Theme.LogText, Font = new Font("Consolas", 10f), IntegralHeight = false
+            };
+            lstErr.ItemHeight = Font.Height * 2 + Theme.S(12);
+            foreach (DosError de in DosErrors.All) lstErr.Items.Add(de);
+            lstErr.DrawItem += DrawDosError;
+            int tipIndex = -1;
+            lstErr.MouseMove += (s, e) =>
+            {
+                int i = lstErr.IndexFromPoint(e.Location);
+                if (i == tipIndex) return;
+                tipIndex = i;
+                DosError de = i >= 0 ? (DosError)lstErr.Items[i] : null;
+                IconButton.Tips.SetToolTip(lstErr, de == null ? null : de.Meaning + "\n→ " + de.Fix);
+            };
+            pageDos.Controls.Add(lstErr);
+            pageDos.Controls.Add(lstDos);
+
+            TableLayoutPanel dosTop = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2, BackColor = Theme.LogBack, Margin = new Padding(0), Padding = new Padding(0, 0, 0, Theme.S(4)) };
+            dosTop.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            dosTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            dosView = new Segmented(Theme.S(150), Lang.T("Comandi pronti"), Lang.T("Messaggi di errore")) { Margin = new Padding(0, 0, Theme.S(12), 0) };
+            Label dosHint = new Label { AutoSize = true, ForeColor = Theme.HeaderMuted, Anchor = AnchorStyles.Left, Margin = new Padding(0) };
+            string hintCmd = Lang.T("Clicca un comando per scriverlo nella riga \"Comando DOS\": completa le parti in maiuscolo (NOME, ID…) e premi Invio.");
+            string hintErr = Lang.T("Cosa significano i messaggi del drive e cosa fare. Nel registro la spiegazione compare da sola sotto ogni errore.");
+            dosHint.Text = hintCmd;
+            dosView.SelectedIndexChanged += delegate
+            {
+                bool err = dosView.SelectedIndex == 1;
+                lstErr.Visible = err; lstDos.Visible = !err;
+                dosHint.Text = err ? hintErr : hintCmd;
+            };
+            dosTop.Controls.Add(dosView, 0, 0);
+            dosTop.Controls.Add(dosHint, 1, 0);
+            pageDos.Controls.Add(dosTop);
 
             // scheda 2: VICE
             Panel pageVice = BuildVicePage();
 
             Panel pageGames = BuildGamesPage();
             Panel pageAdapter = BuildAdapterPage();
-            tabPages = new[] { pageAdapter, pageLog, pageDos, pageVice, pageGames };
+            Panel pageArchive = BuildArchivePage();
+            tabPages = new[] { pageAdapter, pageLog, pageDos, pageVice, pageArchive, pageGames };
+            DarkScrollbars(pageArchive);
             DarkScrollbars(pageAdapter);
             DarkScrollbars(pageGames);
-            DarkScrollbars(txtLog); DarkScrollbars(lstDos); DarkScrollbars(pageVice); DarkScrollbars(lst);
+            DarkScrollbars(txtLog); DarkScrollbars(lstDos); DarkScrollbars(lstErr); DarkScrollbars(pageVice); DarkScrollbars(lst);
             Panel tabContent = new Panel { Dock = DockStyle.Fill, BackColor = Theme.LogBack };
             foreach (Panel p in tabPages) tabContent.Controls.Add(p);
 
@@ -929,6 +1115,202 @@ namespace XumerTool
             AdaptLayout();
         }
 
+        // ================= scheda Internet Archive =================
+
+        TextBox txtIaEmail, txtIaPass, txtIaAccess, txtIaSecret;
+        Control iaLoginBox, iaConnectedBox;
+        Label lblIaUser, lblIaStatus;
+        readonly List<Control> iaButtons = new List<Control>();
+
+        TextBox IaField(bool secret)
+        {
+            return new TextBox
+            {
+                Width = Theme.S(280), BackColor = Theme.InputBack, ForeColor = Theme.InputText, BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9.5f), UseSystemPasswordChar = secret, Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Margin = new Padding(0, Theme.S(4), Theme.S(8), Theme.S(4))
+            };
+        }
+
+        Label IaLabel(string text) { return new Label { Text = text, AutoSize = true, ForeColor = Theme.HeaderMuted, Anchor = AnchorStyles.Left, Margin = new Padding(0, 0, Theme.S(10), 0) }; }
+
+        Label IaTitle(string text)
+        {
+            return new Label { Text = text.ToUpperInvariant(), AutoSize = true, ForeColor = Theme.TabArchive, Font = new Font("Segoe UI", 8f, FontStyle.Bold), Margin = new Padding(0, Theme.S(6), 0, Theme.S(2)) };
+        }
+
+        IconButton IaButton(string glyph, string text, EventHandler click)
+        {
+            IconButton b = new IconButton(glyph, text, ButtonKind.Header) { Margin = new Padding(0, Theme.S(2), Theme.S(8), Theme.S(2)) };
+            b.Click += click;
+            iaButtons.Add(b);
+            return b;
+        }
+
+        /// <summary>
+        /// Scheda Internet Archive: collegamento all'account (accesso con email e password, oppure chiavi S3).
+        /// Il caricamento delle immagini arriverà dopo; qui c'è solo il collegamento.
+        /// </summary>
+        Panel BuildArchivePage()
+        {
+            iaButtons.Clear();
+            if (interactiveMode) InternetArchive.Load();   // negli screenshot la scheda resta "non collegata"
+            else { InternetArchive.Access = InternetArchive.Secret = null; InternetArchive.ScreenName = ""; }
+
+            Panel page = new Panel { Dock = DockStyle.Fill, BackColor = Theme.LogBack, Padding = new Padding(Theme.S(12), Theme.S(6), Theme.S(12), Theme.S(6)), AutoScroll = true };
+            TableLayoutPanel cols = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2, BackColor = Theme.LogBack };
+            cols.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            cols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            // ---- non collegato: accesso con l'account oppure con le chiavi ----
+            TableLayoutPanel login = new TableLayoutPanel { AutoSize = true, ColumnCount = 3, BackColor = Theme.LogBack, Margin = new Padding(0, 0, Theme.S(24), 0) };
+            login.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            login.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            login.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            txtIaEmail = IaField(false); txtIaPass = IaField(true); txtIaAccess = IaField(false); txtIaSecret = IaField(true);
+            Label t1 = IaTitle(Lang.T("Accedi con il tuo account archive.org"));
+            login.Controls.Add(t1, 0, 0); login.SetColumnSpan(t1, 3);
+            login.Controls.Add(IaLabel(Lang.T("Email")), 0, 1); login.Controls.Add(txtIaEmail, 1, 1);
+            login.Controls.Add(IaLabel(Lang.T("Password")), 0, 2); login.Controls.Add(txtIaPass, 1, 2);
+            login.Controls.Add(IaButton(G_CONNECT, Lang.T("Accedi"), OnIaLogin), 2, 2);
+            Label t2 = IaTitle(Lang.T("Oppure con le chiavi S3"));
+            login.Controls.Add(t2, 0, 3); login.SetColumnSpan(t2, 3);
+            login.Controls.Add(IaLabel(Lang.T("Chiave di accesso")), 0, 4); login.Controls.Add(txtIaAccess, 1, 4);
+            login.Controls.Add(IaLabel(Lang.T("Chiave segreta")), 0, 5); login.Controls.Add(txtIaSecret, 1, 5);
+            login.Controls.Add(IaButton(G_CHECK, Lang.T("Salva chiavi"), OnIaKeys), 2, 5);
+            FlowLayoutPanel links = new FlowLayoutPanel { AutoSize = true, WrapContents = true, BackColor = Theme.LogBack, Margin = new Padding(0, Theme.S(6), 0, 0) };
+            links.Controls.Add(IaButton(G_INFO, Lang.T("Pagina delle chiavi"), delegate { OpenLink(InternetArchive.KeysPage); }));
+            links.Controls.Add(IaButton(G_INFO, Lang.T("Crea un account"), delegate { OpenLink(InternetArchive.SignupPage); }));
+            login.Controls.Add(links, 0, 6); login.SetColumnSpan(links, 3);
+            txtIaPass.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; OnIaLogin(s, e); } };
+            txtIaSecret.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; OnIaKeys(s, e); } };
+            iaLoginBox = login;
+
+            // ---- collegato ----
+            FlowLayoutPanel conn = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, BackColor = Theme.LogBack, Margin = new Padding(0, 0, Theme.S(24), 0) };
+            conn.Controls.Add(IaTitle(Lang.T("Account Internet Archive")));
+            lblIaUser = new Label { AutoSize = true, ForeColor = Theme.LogReply, Font = new Font("Segoe UI Semibold", 11f), Margin = new Padding(0, Theme.S(2), 0, Theme.S(6)) };
+            conn.Controls.Add(lblIaUser);
+            FlowLayoutPanel connButtons = new FlowLayoutPanel { AutoSize = true, BackColor = Theme.LogBack, Margin = new Padding(0) };
+            connButtons.Controls.Add(IaButton(G_MONITOR, Lang.T("Il mio archivio"), delegate { OpenLink(InternetArchive.ProfilePage); }));
+            connButtons.Controls.Add(IaButton(G_CANCEL, Lang.T("Scollega"), OnIaDisconnect));
+            conn.Controls.Add(connButtons);
+            conn.Controls.Add(new Label
+            {
+                AutoSize = true, ForeColor = Theme.HeaderMuted, MaximumSize = new Size(Theme.S(460), 0), Margin = new Padding(0, Theme.S(8), 0, 0),
+                Text = Lang.T("Le chiavi di caricamento sono salvate su questo PC, cifrate. Il caricamento delle immagini disco arriverà nella prossima versione.")
+            });
+            iaConnectedBox = conn;
+
+            Panel left = new Panel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, BackColor = Theme.LogBack, Margin = new Padding(0) };
+            left.Controls.Add(login); left.Controls.Add(conn);
+            cols.Controls.Add(left, 0, 0);
+
+            // ---- a destra: cos'è e come vengono trattati i dati ----
+            FlowLayoutPanel info = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, BackColor = Theme.LogBack, Margin = new Padding(0) };
+            info.Controls.Add(IaTitle(Lang.T("Cos'è")));
+            info.Controls.Add(new Label
+            {
+                AutoSize = true, ForeColor = Theme.HeaderMuted, MaximumSize = new Size(Theme.S(520), 0), Margin = new Padding(0, 0, 0, Theme.S(6)),
+                Text = Lang.T("Internet Archive (archive.org) è una biblioteca digitale senza scopo di lucro: lì potrai conservare le immagini dei tuoi dischi e renderle disponibili a tutti.")
+            });
+            info.Controls.Add(IaTitle(Lang.T("I tuoi dati")));
+            info.Controls.Add(new Label
+            {
+                AutoSize = true, ForeColor = Theme.HeaderMuted, MaximumSize = new Size(Theme.S(520), 0), Margin = new Padding(0),
+                Text = Lang.T("La password serve solo per ottenere dal sito le chiavi di caricamento e non viene salvata. Le chiavi restano su questo PC, cifrate con la protezione di Windows del tuo utente; puoi rigenerarle quando vuoi dalla pagina delle chiavi.")
+            });
+            lblIaStatus = new Label { AutoSize = true, ForeColor = Theme.HeaderMuted, Margin = new Padding(0, Theme.S(10), 0, 0) };
+            info.Controls.Add(lblIaStatus);
+            cols.Controls.Add(info, 1, 0);
+
+            page.Controls.Add(cols);
+            RefreshArchiveState();
+            return page;
+        }
+
+        void RefreshArchiveState()
+        {
+            if (iaLoginBox == null) return;
+            bool on = InternetArchive.Connected;
+            iaLoginBox.Visible = !on;
+            iaConnectedBox.Visible = on;
+            lblIaUser.Text = "✓ " + (InternetArchive.ScreenName.Length > 0
+                ? Lang.F("Collegato come {0}", InternetArchive.ScreenName)
+                : Lang.T("Collegato con le chiavi S3"));
+        }
+
+        public void RefreshArchiveStatePublic() { RefreshArchiveState(); }
+
+        void IaStatus(string text, Color color) { lblIaStatus.Text = text; lblIaStatus.ForeColor = color; }
+
+        void IaBusy(bool busy)
+        {
+            foreach (Control c in iaButtons) c.Enabled = !busy;
+            if (busy) IaStatus(Lang.T("Collegamento ad archive.org in corso…"), Theme.HeaderMuted);
+        }
+
+        void OnIaLogin(object sender, EventArgs e)
+        {
+            string email = txtIaEmail.Text.Trim(), pass = txtIaPass.Text;
+            if (email.Length == 0 || pass.Length == 0) { IaStatus(Lang.T("Scrivi email e password del tuo account archive.org."), Theme.LogError); return; }
+            txtIaPass.Text = "";   // la password non resta nemmeno nella casella
+            IaBusy(true);
+            Thread t = new Thread(delegate ()
+            {
+                string error = null, access = null, secret = null, name = null;
+                try { InternetArchive.Login(email, pass, out access, out secret, out name); }
+                catch (Exception ex) { error = ex.Message; }
+                Ui(delegate
+                {
+                    IaBusy(false);
+                    if (error != null) { IaStatus(error, Theme.LogError); return; }
+                    InternetArchive.Save(access, secret, name);
+                    txtIaEmail.Text = "";
+                    IaStatus(Lang.T("Collegato. Le chiavi di caricamento sono salvate, cifrate."), Theme.LogReply);
+                    Log(Lang.T("Internet Archive: account collegato") + (name.Length > 0 ? " (" + name + ")" : ""));
+                    RefreshArchiveState();
+                });
+            });
+            t.IsBackground = true;
+            t.Start();
+        }
+
+        void OnIaKeys(object sender, EventArgs e)
+        {
+            string access = txtIaAccess.Text.Trim(), secret = txtIaSecret.Text.Trim();
+            if (access.Length == 0 || secret.Length == 0) { IaStatus(Lang.T("Incolla tutte e due le chiavi (accesso e segreta)."), Theme.LogError); return; }
+            IaBusy(true);
+            Thread t = new Thread(delegate ()
+            {
+                string error = null, name = "";
+                try { name = InternetArchive.CheckKeys(access, secret); }
+                catch (Exception ex) { error = ex.Message; }
+                Ui(delegate
+                {
+                    IaBusy(false);
+                    if (error != null) { IaStatus(error, Theme.LogError); return; }
+                    InternetArchive.Save(access, secret, name);
+                    txtIaAccess.Text = ""; txtIaSecret.Text = "";
+                    IaStatus(Lang.T("Chiavi valide e salvate, cifrate."), Theme.LogReply);
+                    Log(Lang.T("Internet Archive: account collegato con le chiavi S3"));
+                    RefreshArchiveState();
+                });
+            });
+            t.IsBackground = true;
+            t.Start();
+        }
+
+        void OnIaDisconnect(object sender, EventArgs e)
+        {
+            if (MessageBox.Show(this, Lang.T("Scollegare l'account Internet Archive? Le chiavi salvate su questo PC verranno cancellate (sul sito non cambia nulla)."),
+                Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            InternetArchive.Disconnect();
+            IaStatus(Lang.T("Account scollegato: le chiavi sono state cancellate da questo PC."), Theme.HeaderMuted);
+            Log(Lang.T("Internet Archive: account scollegato"));
+            RefreshArchiveState();
+        }
+
         Panel BuildVicePage()
         {
             Panel page = new Panel { Dock = DockStyle.Fill, BackColor = Theme.LogBack, Padding = new Padding(Theme.S(12), Theme.S(8), Theme.S(12), Theme.S(6)), AutoScroll = true };
@@ -946,7 +1328,12 @@ namespace XumerTool
             browse.Click += OnViceBrowse;
             t.Controls.Add(browse, 2, 0);
             IconButton find = new IconButton(G_SEARCH, Lang.T("Cerca"), ButtonKind.Header);
-            find.Click += delegate { Settings.Set("vice", ""); txtVice.Text = Vice.Find(true) ?? ""; SaveVicePath(txtVice.Text); };
+            find.Click += delegate
+            {
+                if (viceScanning) return;
+                Settings.Set("vice", ""); txtVice.Text = "";
+                StartViceSearch(true);
+            };
             t.Controls.Add(find, 3, 0);
 
             t.Controls.Add(new Label { Text = Lang.T("Cartella file"), AutoSize = true, ForeColor = Theme.HeaderMuted, Anchor = AnchorStyles.Left, Margin = new Padding(0, 0, Theme.S(10), 0) }, 0, 1);
@@ -999,10 +1386,42 @@ namespace XumerTool
 
             page.Controls.Add(t);
 
-            string path = Vice.Find();
-            txtVice.Text = path ?? Settings.Get("vice", "");
+            txtVice.Text = Vice.Saved() ?? Settings.Get("vice", "");
+            if (!interactiveMode) { txtVice.Text = ""; txtViceDir.Text = ""; }   // screenshot: i percorsi dell'utente restano privati
             UpdateViceState();
             return page;
+        }
+
+        bool viceScanning, viceSearched;
+
+        /// <summary>
+        /// Cerca VICE sul disco in sottofondo (una volta per sessione, o sempre con force = true),
+        /// così l'apertura della finestra non aspetta la ricerca.
+        /// </summary>
+        void StartViceSearch(bool force)
+        {
+            if (viceScanning || (!force && (Vice.Saved() != null || viceSearched))) return;
+            viceScanning = viceSearched = true;
+            UpdateToolStates();
+            if (lblViceState != null) { lblViceState.Text = Lang.T("ricerca in corso…"); lblViceState.ForeColor = Theme.HeaderMuted; }
+            Thread t = new Thread(delegate ()
+            {
+                string found = null;
+                try { found = Vice.Scan(); } catch { }
+                Ui(delegate
+                {
+                    viceScanning = false;
+                    if (found != null)
+                    {
+                        Settings.Set("vice", found);
+                        if (txtVice.Text.Trim().Length == 0) txtVice.Text = found;
+                    }
+                    UpdateViceState();
+                    UpdateToolStates();
+                });
+            });
+            t.IsBackground = true;
+            t.Start();
         }
 
         void SaveVicePath(string path)
@@ -1056,6 +1475,25 @@ namespace XumerTool
             TextRenderer.DrawText(e.Graphics, c.Desc, Font, r2, Theme.LogText, f);
         }
 
+        /// <summary>Una voce della legenda: numero e testo del drive a sinistra, significato e soluzione a destra.</summary>
+        void DrawDosError(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+            bool sel = (e.State & DrawItemState.Selected) != 0;
+            using (SolidBrush b = new SolidBrush(sel ? Theme.HeaderButton : Theme.LogBack)) e.Graphics.FillRectangle(b, e.Bounds);
+            DosError d = (DosError)lstErr.Items[e.Index];
+            int colW = Theme.S(230), pad = Theme.S(6), half = e.Bounds.Height / 2;
+            TextFormatFlags f = TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis;
+            Rectangle code = new Rectangle(e.Bounds.X + pad, e.Bounds.Y, colW, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics, d.Code.ToString("00") + "  " + d.Text, lstErr.Font, code, d.Info ? Theme.LogReply : Theme.LogError, f);
+            int x = e.Bounds.X + pad + colW, w = e.Bounds.Width - colW - 2 * pad;
+            TextRenderer.DrawText(e.Graphics, d.Meaning, Font, new Rectangle(x, e.Bounds.Y + Theme.S(3), w, half - Theme.S(3)), Theme.LogText, f);
+            TextRenderer.DrawText(e.Graphics, "→ " + d.Fix, Font, new Rectangle(x, e.Bounds.Y + half, w, half - Theme.S(3)), Theme.HeaderMuted, f);
+            // linea sottile di separazione tra le voci
+            using (Pen p = new Pen(Theme.Blend(Theme.LogBack, Theme.LogText, 0.08f)))
+                e.Graphics.DrawLine(p, e.Bounds.X + pad, e.Bounds.Bottom - 1, e.Bounds.Right - pad, e.Bounds.Bottom - 1);
+        }
+
         void InsertDosCommand(DosCommand c)
         {
             txtCmd.Text = c.Cmd;
@@ -1079,6 +1517,14 @@ namespace XumerTool
             if (e.Index < 0) return;
             DirEntry en = (DirEntry)lst.Items[e.Index];
             ScreenFonts.Draw(e.Graphics, FormatEntry(en), lst.Font, fore, e.Bounds);
+
+            // icona pixel del tipo di file, in una colonna dopo il tipo (la directory resta allineata come sul C64)
+            int px = Math.Max(1, (int)Math.Round(lst.ItemHeight * 0.62 / 8.0));
+            float col = ScreenFonts.Measure(e.Graphics, new string('0', 30), lst.Font).Width;
+            int x = e.Bounds.X + (int)Math.Ceiling(col);
+            int y = e.Bounds.Y + (e.Bounds.Height - 8 * px) / 2;
+            bool selected = (e.State & DrawItemState.Selected) != 0;
+            FileTypeIcons.Draw(e.Graphics, en.Type, x, y, px, selected ? fore : Color.Empty);
         }
 
         static string FormatEntry(DirEntry e)
@@ -1168,7 +1614,8 @@ namespace XumerTool
             idleTimer = new System.Windows.Forms.Timer { Interval = 5000 };
             idleTimer.Tick += delegate
             {
-                if (!SaverEnabled || saverForm != null || panelSaver != null || WindowState == FormWindowState.Minimized) return;
+                // niente salvaschermo durante un'operazione: coprirebbe la mappa del disco e l'avanzamento
+                if (!SaverEnabled || saverForm != null || panelSaver != null || Busy || WindowState == FormWindowState.Minimized) return;
                 if ((DateTime.Now - idle.LastInput).TotalMinutes < 5) return;
                 // a tutto schermo solo se l'app è in primo piano, per non coprire il lavoro in altre finestre
                 if (SaverFullScreen && ActiveForm != this) return;
@@ -1201,6 +1648,7 @@ namespace XumerTool
         {
             panelSaver = new PetsciiSaver(10f, Theme.C64Back, Lang.T("PREMI UN TASTO O MUOVI IL MOUSE PER TORNARE ALLA DIRECTORY")) { Dock = DockStyle.Fill };
             c64Screen.Visible = false;
+            if (diskMap != null) diskMap.Visible = false;
             c64Frame.Controls.Add(panelSaver);
             c64Frame.PerformLayout();
         }
@@ -1213,7 +1661,8 @@ namespace XumerTool
             p.Stop();
             if (p.Parent != null) p.Parent.Controls.Remove(p);
             p.Dispose();
-            if (c64Screen != null) c64Screen.Visible = true;
+            if (mapShown && diskMap != null) diskMap.Visible = true;
+            else if (c64Screen != null) c64Screen.Visible = true;
         }
 
         /// <summary>Per le anteprime: il salvaschermo nella directory, fermo a un istante.</summary>
@@ -1259,7 +1708,9 @@ namespace XumerTool
         }
 
         int DevNumber { get { return 8 + cmbDev.SelectedIndex; } }
-        bool Busy { get { return worker != null && worker.IsAlive; } }
+        /// <summary>True dall'avvio di un lavoro fino alla sua fine (impostato dal lavoro stesso, non dallo stato del thread).</summary>
+        volatile bool working;
+        bool Busy { get { return working; } }
 
         void UpdateButtons()
         {
@@ -1272,7 +1723,8 @@ namespace XumerTool
             btnConnect.Invalidate();
             btnCancel.Visible = busy;
             cmbDev.Enabled = !busy;
-            led.Color = busy ? Theme.Busy : online ? Theme.Ok : Theme.Off;
+            led.Powered = online;
+            led.Busy = busy;
             btnViceFile.Enabled = online && !busy;
             btnViceDisk.Enabled = online && !busy;
             btnViceImage.Enabled = !busy;
@@ -1290,6 +1742,7 @@ namespace XumerTool
         static Color LogColor(string s)
         {
             if (s.StartsWith("> ")) return Theme.LogSent;
+            if (s.StartsWith(HintPrefix)) return Theme.HeaderMuted;   // spiegazione di un errore del drive
             if (s.StartsWith("< "))
             {
                 int code = CbmDrive.StatusCode(s.Substring(2));
@@ -1331,23 +1784,41 @@ namespace XumerTool
             txtLog.ScrollToCaret();
         }
 
+        /// <summary>Inizio delle righe di spiegazione aggiunte sotto gli errori del drive.</summary>
+        const string HintPrefix = "   ⓘ ";
+        int lastHintCode = -1;
+        DateTime lastHintTime;
+
         void Log(string s)
         {
+            // risposta del drive con un errore (o messaggio d'errore che la contiene): spiegazione dalla legenda
+            DosError hint = s.StartsWith("< ") || s.StartsWith("ERROR") ? DosErrors.ErrorIn(s) : null;
             Ui(delegate
             {
                 string time = DateTime.Now.ToString("HH:mm:ss");
-                logEntries.Add(new KeyValuePair<string, string>(time, s));
-                if (logEntries.Count > 3000)
+                AddLogLine(time, s);
+                // la stessa risposta spesso compare due volte (stato del drive, poi "ERRORE: …"): una spiegazione basta
+                if (hint != null && !(hint.Code == lastHintCode && (DateTime.Now - lastHintTime).TotalSeconds < 3))
                 {
-                    // tiene il registro leggero: elimina le righe più vecchie anche dallo schermo
-                    logEntries.RemoveRange(0, 1000);
-                    RenderLog();
+                    lastHintCode = hint.Code; lastHintTime = DateTime.Now;
+                    AddLogLine(time, HintPrefix + hint.Meaning + " → " + hint.Fix);
                 }
-                else AppendLog(time, s);
                 txtLog.SelectionStart = txtLog.TextLength;
                 txtLog.ScrollToCaret();
                 if (s.StartsWith("ERROR") && currentTab != TAB_LOG) SelectTab(TAB_LOG);   // "ERRORE" e "ERROR"
             });
+        }
+
+        void AddLogLine(string time, string s)
+        {
+            logEntries.Add(new KeyValuePair<string, string>(time, s));
+            if (logEntries.Count > 3000)
+            {
+                // tiene il registro leggero: elimina le righe più vecchie anche dallo schermo
+                logEntries.RemoveRange(0, 1000);
+                RenderLog();
+            }
+            else AppendLog(time, s);
         }
 
         DateTime lastProgress;
@@ -1434,14 +1905,7 @@ namespace XumerTool
             IconButton.Tips.SetToolTip(lblState, headerLevel >= 3 ? stateSub : null);
         }
 
-        void SetToolbarLevel(int l)
-        {
-            foreach (IconButton b in toolButtons)
-            {
-                b.Text = l == 1 && b.ShortText != null ? b.ShortText : b.LongText;
-                b.Compact = l >= 2;
-            }
-        }
+        void SetToolbarLevel(int l) { SetRibbonLevel(l); }
 
         int ToolbarWidth()
         {
@@ -1453,11 +1917,17 @@ namespace XumerTool
 
         // ================= esecuzione in background =================
 
-        void Run(string title, Action job)
+        void Run(string title, Action job) { Run(title, job, null); }
+
+        /// <summary>Esegue un lavoro in sottofondo; con mapKind mostra la mappa del disco al posto della directory.</summary>
+        void Run(string title, Action job, ImageKind? mapKind)
         {
             if (Busy) return;
             if (drive != null) drive.Cancel = false;
+            if (mapKind != null) ShowMap(mapKind.Value, title + " " + mapKind.Value);
+            else HideMap();   // un'altra operazione riporta la directory
             progress.Value = 0; lblProgress.Text = title + "…";
+            working = true;
             worker = new Thread(delegate ()
             {
                 DateTime t0 = DateTime.Now;
@@ -1474,14 +1944,49 @@ namespace XumerTool
                 catch (Exception ex)
                 {
                     Log(Lang.T("ERRORE: ") + ex.Message);
-                    Ui(delegate { lblProgress.Text = title + Lang.T(": errore"); });
+                    Ui(delegate { lblProgress.Text = title + Lang.T(": errore"); led.ErrorBlink(); });
                     if (!(ex is DriveException) && xum != null) { Log(Lang.T("Ripristino comunicazione con l'adattatore…")); xum.Recover(); }
                 }
-                finally { Ui(UpdateButtons); }
+                finally
+                {
+                    // prima si segna la fine del lavoro, poi si aggiornano i pulsanti: se l'interfaccia
+                    // risponde subito, il thread è ancora vivo per un istante e i pulsanti resterebbero spenti
+                    working = false;
+                    Ui(UpdateButtons);
+                    if (mapKind != null) Ui(delegate { if (diskMap != null) diskMap.Finish(); });
+                }
             });
             worker.IsBackground = true;
             worker.Start();
             UpdateButtons();
+        }
+
+        // ================= mappa del disco =================
+
+        void ShowMap(ImageKind kind, string title)
+        {
+            if (diskMap == null) return;
+            StopPanelSaver();
+            diskMap.Start(kind, title);
+            mapShown = true;
+            c64Screen.Visible = false;
+            diskMap.Visible = true;
+            diskMap.BringToFront();
+        }
+
+        void HideMap()
+        {
+            if (!mapShown) return;
+            mapShown = false;
+            diskMap.Visible = false;
+            c64Screen.Visible = true;
+        }
+
+        /// <summary>Riceve dal drive lo stato di ogni settore (thread di lavoro).</summary>
+        void OnBlock(int track, int sector, byte st)
+        {
+            DiskMap m = diskMap;
+            if (m != null && mapShown) m.Set(track, sector, st);
         }
 
         // ================= collegamento =================
@@ -1502,6 +2007,7 @@ namespace XumerTool
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            if (interactiveMode) StartViceSearch(false);
             if (interactiveMode && AutoConnect)
             {
                 Log(Lang.T("Collegamento automatico all'avvio (si disattiva nella scheda Adattatore)."));
@@ -1515,7 +2021,7 @@ namespace XumerTool
             {
                 Xum1541 x = Xum1541.Open();
                 Log(string.Format(Lang.T("Adattatore xum1541 trovato: firmware v{0} (capacità 0x{1:X2})"), x.Version, x.Capabilities));
-                CbmDrive d = new CbmDrive(x) { Dev = dev, Log = Log, Progress = SetProgress };
+                CbmDrive d = new CbmDrive(x) { Dev = dev, Log = Log, Progress = SetProgress, Block = OnBlock };
                 xum = x; drive = d;
                 string st;
                 try { st = d.ReadStatus(); }
@@ -1554,7 +2060,9 @@ namespace XumerTool
                 if (drive != null) drive.Cancel = true;
                 worker.Join(3000);
             }
-            if (xum != null) xum.Dispose();
+            // se il lavoro è ancora dentro una chiamata USB non si libera l'adattatore sotto di lui:
+            // ci pensa Windows alla chiusura del processo
+            if (xum != null && !Busy) xum.Dispose();
             base.OnFormClosing(e);
         }
 
@@ -1783,7 +2291,53 @@ namespace XumerTool
                 byte[] img = drive.ReadImage(kind);
                 File.WriteAllBytes(path, img);
                 Log(Lang.T("Immagine salvata: ") + path);
-            });
+            }, kind);
+        }
+
+        /// <summary>
+        /// Crea immagine con la copia veloce S2 (sperimentale, solo lettura). Se non riesce, rifà la copia
+        /// con il metodo normale, così l'utente ottiene comunque l'immagine.
+        /// </summary>
+        void OnDiskToImageFast(object sender, EventArgs e)
+        {
+            if (drive == null || Busy) return;
+            if (Settings.Get("fastwarned", "0") != "1")
+            {
+                if (MessageBox.Show(this,
+                    Lang.T("La copia veloce è SPERIMENTALE: non è ancora stata provata su tutti i drive.\n\n") +
+                    Lang.T("• Legge soltanto: il disco non viene mai scritto.\n") +
+                    Lang.T("• Funziona con 1541, 1570 e 1571 (D64; D71 solo con il 1571).\n") +
+                    Lang.T("• Se qualcosa va storto, il programma rifà la copia con il metodo normale.\n\nContinuare?"),
+                    Lang.T("Copia veloce"), MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
+                Settings.Set("fastwarned", "1");
+            }
+            string path;
+            using (SaveFileDialog d = new SaveFileDialog())
+            {
+                d.Filter = Lang.T("Immagine 1541 (*.d64)|*.d64|Immagine 1571 doppia faccia (*.d71)|*.d71");
+                d.FileName = currentDir != null && currentDir.DiskName.Length > 0 ? SafeFileName(currentDir.DiskName, "d64") : "disco.d64";
+                if (d.ShowDialog(this) != DialogResult.OK) return;
+                path = d.FileName;
+            }
+            ImageKind kind = Path.GetExtension(path).ToLowerInvariant() == ".d71" ? ImageKind.D71 : ImageKind.D64;
+            string title = Lang.T("Copia veloce");
+            Run(title, delegate
+            {
+                byte[] img;
+                try { img = drive.ReadImageFast(kind); }
+                catch (OperationCanceledException) { throw; }
+                catch (Exception ex)
+                {
+                    Log(Lang.T("ERRORE: copia veloce non riuscita: ") + ex.Message);
+                    Log(Lang.T("Rifaccio la copia con il metodo normale…"));
+                    Thread.Sleep(2500);                   // il drive si riprende dall'eventuale reset del bus
+                    try { drive.ReadStatus(); } catch { }
+                    Invoke((Action)delegate { if (diskMap != null && mapShown) diskMap.Start(kind, Lang.T("Crea immagine") + " " + kind); });
+                    img = drive.ReadImage(kind);
+                }
+                File.WriteAllBytes(path, img);
+                Log(Lang.T("Immagine salvata: ") + path);
+            }, kind);
         }
 
         void OnImageToDisk(object sender, EventArgs e)
@@ -1809,8 +2363,8 @@ namespace XumerTool
             Run(Lang.T("Scrivi immagine"), delegate
             {
                 drive.WriteImage(kind, img, format);
-                ShowDirectory(drive.ReadDirectory());
-            });
+                ShowDirectory(drive.ReadDirectory());   // aggiorna la directory dietro la mappa (un clic sulla mappa la mostra)
+            }, kind);
         }
 
         // ================= VICE =================
@@ -1914,7 +2468,7 @@ namespace XumerTool
                 File.WriteAllBytes(path, img);
                 Log(Lang.T("Immagine salvata: ") + path);
                 Ui(delegate { LaunchVice(exe, path); });
-            });
+            }, ImageKind.D64);
         }
 
         // ================= anteprima (solo sviluppo) =================
@@ -1937,6 +2491,32 @@ namespace XumerTool
             SelectTab(tab);
             progress.Maximum = 683; progress.Value = 410;
             lblProgress.Text = "410 / 683";
+        }
+
+        /// <summary>Per le anteprime: la legenda dei messaggi e un errore spiegato nel registro.</summary>
+        public void DemoErrors()
+        {
+            dosView.SelectedIndex = 1;
+            lstErr.SelectedIndex = 6;   // 23 READ ERROR
+            Log("> S0:VECCHIO");
+            Log("< 62, FILE NOT FOUND,00,00");
+        }
+
+        /// <summary>Per le anteprime: la mappa del disco a metà di una copia, con qualche errore.</summary>
+        public void DemoMap(ImageKind kind)
+        {
+            ShowMap(kind, Lang.T("Crea immagine") + " " + kind);
+            int tracks = CbmDrive.Tracks(kind), total = CbmDrive.TotalBlocks(kind), done = 0, stop = total * 3 / 5;
+            for (int t = 1; t <= tracks && done < stop; t++)
+                for (int s = 0; s < CbmDrive.SectorsPerTrack(kind, t) && done < stop; s++, done++)
+                    diskMap.Set(t, s, (t == 7 && s >= 3 && s <= 5) || (t == 18 && s == 11) ? BlockState.Error : BlockState.Done);
+            // il settore in lavorazione: il primo non ancora fatto
+            for (int t = 1, n = 0; t <= tracks; t++)
+                for (int s = 0; s < CbmDrive.SectorsPerTrack(kind, t); s++, n++)
+                    if (n == stop) diskMap.Set(t, s, BlockState.Working);
+            led.Busy = true;
+            progress.Maximum = total; progress.Value = stop;
+            lblProgress.Text = stop + " / " + total;
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿XUMER TOOL 1.1b (beta) - by darkwave3D
+﻿XUMER TOOL 1.2b (beta) - by darkwave3D
 ======================================
 
 Windows program to use Commodore 1541, 1571 and 1581 drives
 with the xum1541 USB adapter (Arduino Pro Micro).
 
 FIRST START
+0. Extract the "XUMER TOOL" folder wherever you like (e.g. Documents) and run
+   XumerTool.exe. Nothing needs to be installed.
+   If Windows shows the SmartScreen warning: More info -> Run anyway.
 1. Install the WinUSB driver for the adapter with Zadig
    (in the program: Adapter tab -> Required tools -> Download Zadig).
    In Zadig: Options -> List All Devices, choose "xum1541", WinUSB, Install Driver.
@@ -25,9 +28,9 @@ WHERE THE FILES ARE
 - Settings: %APPDATA%\XUMERTool
 - Files for VICE: Documents\XUMER TOOL\VICE (can be changed)
 
-UNINSTALL
-Windows Settings -> Installed apps -> XUMER TOOL -> Uninstall,
-or "Disinstalla.exe" in this folder.
+TO REMOVE IT
+Just delete this folder. To also delete the settings,
+delete %APPDATA%\XUMERTool.
 
 LICENSE
 XUMER TOOL is released under the MIT license (see LICENSE.txt).

@@ -86,6 +86,9 @@ namespace XumerTool
         /// <summary>Limite massimo di attesa di una risposta, anche se l'adattatore continua a dire "occupato".</summary>
         public int MaxWaitMs = 240000;
 
+        /// <summary>Se restituisce true, l'attesa di una risposta si interrompe (pulsante Annulla).</summary>
+        public Func<bool> Cancelled = delegate { return false; };
+
         int WaitStatus()
         {
             DateTime limit = DateTime.Now.AddMilliseconds(MaxWaitMs);
@@ -93,7 +96,15 @@ namespace XumerTool
             {
                 if (DateTime.Now > limit)
                     throw new UsbTimeoutException(Lang.T("Il drive non risponde da troppo tempo (è stato spento o scollegato?)"));
-                byte[] s = usb.Read(EP_IN, 3, StatusTimeoutMs);
+                byte[] s;
+                // un pacchetto di stato in ritardo non è ancora un errore: si riprova fino al limite massimo,
+                // a meno che l'utente non annulli (l'errore USB fa poi ripristinare l'adattatore)
+                try { s = usb.Read(EP_IN, 3, StatusTimeoutMs); }
+                catch (UsbTimeoutException)
+                {
+                    if (Cancelled()) throw new UsbTimeoutException(Lang.T("Attesa del drive interrotta"));
+                    continue;
+                }
                 if (s.Length == 0) continue;
                 if (s.Length != 3) throw new IOException(Lang.T("Risposta di stato non valida (") + s.Length + Lang.T(" byte)"));
                 if (s[0] == IO_BUSY) continue;

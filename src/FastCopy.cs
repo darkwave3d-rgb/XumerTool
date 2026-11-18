@@ -12,7 +12,8 @@ namespace XumerTool
         /// <summary>Modello del drive ("1541", "1571", "1570", "1581") ricavato dal messaggio 73.</summary>
         public string Model;
 
-        const int Interleave = 7; // come d64copy per il protocollo S2
+        // come d64copy per il protocollo S2: default_interleave[] = { auto -1, original 17, serial1 4, serial2 13, parallel 7 }
+        const int Interleave = 13;
 
         public static string ModelFromStatus(string st)
         {
@@ -35,8 +36,8 @@ namespace XumerTool
         public bool FastSupported(ImageKind kind)
         {
             if (kind == ImageKind.D81) return false;
-            if (kind == ImageKind.D71) return Model == "1571";
-            return Model == "1571" || Model == "1541";
+            if (kind == ImageKind.D71) return Model == "1571";   // d64copy: le D71 richiedono un 1571
+            return Model == "1571" || Model == "1570" || Model == "1541";
         }
 
         static byte[] DriveProgram(string name, int expectedOrigin)
@@ -97,13 +98,21 @@ namespace XumerTool
             Thread.Sleep(20);
         }
 
+        /// <summary>
+        /// Chiude il programma veloce come close_disk() di OpenCBM: traccia 0 (con conferma), poi il byte
+        /// del settore senza attendere l'ultima conferma (il drive libera subito le linee ed esce:
+        /// il firmware potrebbe perdere quel segnale brevissimo e restare in attesa), infine linee a riposo.
+        /// </summary>
         void StopS2()
         {
             try
             {
-                x.Write(Xum1541.S2, new byte[] { 0, 0 }, 0, 2);   // traccia 0 = fine
-                Thread.Sleep(5);
-                x.IecSetRelease(Xum1541.IEC_CLOCK, Xum1541.IEC_DATA | Xum1541.IEC_ATN);
+                x.Write(Xum1541.S2, new byte[] { 0 }, 0, 1);   // traccia 0 = fine
+                S2WriteByteNoAck(0);
+                Thread.Sleep(1);
+                x.IecSetRelease(0, Xum1541.IEC_DATA);
+                x.IecSetRelease(0, Xum1541.IEC_ATN);
+                x.IecSetRelease(Xum1541.IEC_CLOCK, 0);
                 Thread.Sleep(50);
             }
             catch (Exception)
@@ -114,9 +123,46 @@ namespace XumerTool
             }
         }
 
+        /// <summary>
+        /// Un byte S2 pilotando a mano le linee IEC (come s2_write_byte_nohs di OpenCBM): due bit per volta
+        /// su DATA, ATN fa da clock; si aspetta la conferma su CLK tranne dopo l'ultima coppia di bit.
+        /// </summary>
+        void S2WriteByteNoAck(byte c)
+        {
+            for (int i = 4; ; i--)
+            {
+                SetData((c & 1) != 0); c >>= 1;
+                x.IecSetRelease(0, Xum1541.IEC_ATN);
+                WaitClock(false);
+                SetData((c & 1) != 0); c >>= 1;
+                x.IecSetRelease(Xum1541.IEC_ATN, 0);
+                if (i <= 1) return;
+                WaitClock(true);
+            }
+        }
+
+        void SetData(bool bit)
+        {
+            if (bit) x.IecSetRelease(Xum1541.IEC_DATA, 0);
+            else x.IecSetRelease(0, Xum1541.IEC_DATA);
+        }
+
+        /// <summary>Aspetta che CLK sia attiva (true) o rilasciata (false), al massimo 2 secondi.</summary>
+        void WaitClock(bool active)
+        {
+            DateTime t0 = DateTime.Now;
+            while (((x.IecPoll() & Xum1541.IEC_CLOCK) != 0) != active)
+            {
+                if ((DateTime.Now - t0).TotalMilliseconds > 2000)
+                    throw new DriveException(Lang.T("Il drive non risponde sulla linea CLK"));
+                Thread.Sleep(1);
+            }
+        }
+
         string TurboName(bool write)
         {
-            return (write ? "turbowrite" : "turboread") + Model;
+            // come d64copy: il 1541 usa i suoi programmi, 1570 e 1571 quelli del 1571
+            return (write ? "turbowrite" : "turboread") + (Model == "1541" ? "1541" : "1571");
         }
 
         public byte[] ReadImageFast(ImageKind kind)
@@ -148,6 +194,7 @@ namespace XumerTool
                     {
                         CheckCancel();
                         while (got[se]) se = (se + 1) % n;
+                        Block(t, se, BlockState.Working);
                         x.Write(Xum1541.S2, new byte[] { (byte)t, (byte)se }, 0, 2);
                         byte[] r = x.Read(Xum1541.S2, 257);
                         if (r.Length != 257) throw new IOException(Lang.T("Risposta incompleta dal drive (") + r.Length + Lang.T(" byte)"));
@@ -156,11 +203,13 @@ namespace XumerTool
                         {
                             Array.Copy(r, 1, img, idx * 256, 256);
                             err[idx] = 1;
+                            Block(t, se, BlockState.Done);
                         }
                         else
                         {
                             anyError = true;
                             err[idx] = r[0];
+                            Block(t, se, BlockState.Error);
                             Log(string.Format(Lang.T("Errore traccia {0} settore {1}: codice {2} (errore DOS {3})"), t, se, r[0], r[0] + 18));
                         }
                         got[se] = true;
@@ -214,6 +263,7 @@ namespace XumerTool
                     {
                         CheckCancel();
                         while (put[se]) se = (se + 1) % n;
+                        Block(t, se, BlockState.Working);
                         buf[0] = (byte)t; buf[1] = (byte)se;
                         Array.Copy(img, BlockOffset(kind, t, se), buf, 2, 256);
                         for (int attempt = 0; ; attempt++)
@@ -227,6 +277,7 @@ namespace XumerTool
                             if (attempt >= 2) { failure = string.Format(Lang.T("errore di scrittura su traccia {0} settore {1} (codice {2})"), t, se, r[0]); break; }
                         }
                         put[se] = true;
+                        Block(t, se, failure == null ? BlockState.Done : BlockState.Error);
                         Progress(++done, total);
                         se = (se + Interleave) % n;
                     }

@@ -88,7 +88,7 @@ namespace XumerTool
         public Color LogBack, LogText, LogSent, LogReply, LogError, LogTime;
         public Color InputBack, InputText, FieldBack, FieldText;
         public Color SectionDisk, SectionFile, SectionImage, SectionCaptionText;
-        public Color TabLog, TabDos, TabVice, TabGames, TabAdapter;
+        public Color TabLog, TabDos, TabVice, TabGames, TabAdapter, TabArchive;
     }
 
     static class Theme
@@ -105,7 +105,7 @@ namespace XumerTool
         public static Color LogBack, LogText, LogSent, LogReply, LogError, LogTime;
         public static Color InputBack, InputText, FieldBack, FieldText;
         public static Color SectionDisk, SectionFile, SectionImage, SectionCaptionText;
-        public static Color TabLog, TabDos, TabVice, TabGames, TabAdapter;
+        public static Color TabLog, TabDos, TabVice, TabGames, TabAdapter, TabArchive;
 
         static Color H(int rgb) { return Color.FromArgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF); }
 
@@ -124,7 +124,7 @@ namespace XumerTool
             LogBack = p.LogBack; LogText = p.LogText; LogSent = p.LogSent; LogReply = p.LogReply; LogError = p.LogError; LogTime = p.LogTime;
             InputBack = p.InputBack; InputText = p.InputText; FieldBack = p.FieldBack; FieldText = p.FieldText;
             SectionDisk = p.SectionDisk; SectionFile = p.SectionFile; SectionImage = p.SectionImage; SectionCaptionText = p.SectionCaptionText;
-            TabLog = p.TabLog; TabDos = p.TabDos; TabVice = p.TabVice; TabGames = p.TabGames; TabAdapter = p.TabAdapter;
+            TabLog = p.TabLog; TabDos = p.TabDos; TabVice = p.TabVice; TabGames = p.TabGames; TabAdapter = p.TabAdapter; TabArchive = p.TabArchive;
         }
 
         /// <summary>Tavolozza di un tema per nome (senza applicarla). Nome sconosciuto = "Chiaro".</summary>
@@ -144,7 +144,7 @@ namespace XumerTool
                     LogBack = H(0x0B1220), LogText = H(0xD1D5DB), LogSent = H(0x93C5FD), LogReply = H(0x86EFAC), LogError = H(0xFCA5A5), LogTime = H(0x6B7280),
                     InputBack = H(0x1F2937), InputText = H(0xF9FAFB), FieldBack = H(0x111827), FieldText = H(0xE5E7EB),
                     SectionDisk = H(0x818CF8), SectionFile = H(0x2DD4BF), SectionImage = H(0xFB923C), SectionCaptionText = H(0x0B1220),
-                    TabLog = H(0x38BDF8), TabDos = H(0xA3E635), TabVice = H(0xF472B6), TabGames = H(0xC084FC), TabAdapter = H(0xFACC15)
+                    TabLog = H(0x38BDF8), TabDos = H(0xA3E635), TabVice = H(0xF472B6), TabGames = H(0xC084FC), TabAdapter = H(0xFACC15), TabArchive = H(0x14B8A6)
                 };
                 case "Tokyo Night": return new Palette
                 {
@@ -158,7 +158,7 @@ namespace XumerTool
                     LogBack = H(0x16161E), LogText = H(0xA9B1D6), LogSent = H(0x7DCFFF), LogReply = H(0x9ECE6A), LogError = H(0xF7768E), LogTime = H(0x565F89),
                     InputBack = H(0x292E42), InputText = H(0xC0CAF5), FieldBack = H(0x1A1B26), FieldText = H(0xC0CAF5),
                     SectionDisk = H(0xBB9AF7), SectionFile = H(0x73DACA), SectionImage = H(0xFF9E64), SectionCaptionText = H(0x1A1B26),
-                    TabLog = H(0x7DCFFF), TabDos = H(0x9ECE6A), TabVice = H(0xE0AF68), TabGames = H(0xBB9AF7), TabAdapter = H(0xFF9E64)
+                    TabLog = H(0x7DCFFF), TabDos = H(0x9ECE6A), TabVice = H(0xE0AF68), TabGames = H(0xBB9AF7), TabAdapter = H(0xFF9E64), TabArchive = H(0x73DACA)
                 };
                 // Commodore: plastica beige del C64 e del 1541, tasti marroni, schermo con i colori originali (Colodore),
                 // sezioni e schede con l'arcobaleno del logo in versione pastello.
@@ -174,7 +174,7 @@ namespace XumerTool
                     LogBack = H(0x2D251F), LogText = H(0xE8DFCF), LogSent = H(0xA9B8EC), LogReply = H(0xA8D69A), LogError = H(0xF0A39A), LogTime = H(0x8C7D6A),
                     InputBack = H(0x4A3D33), InputText = H(0xF4ECDD), FieldBack = H(0xFFFCF5), FieldText = H(0x3A2E25),
                     SectionDisk = H(0x8F88E0), SectionFile = H(0x84BF78), SectionImage = H(0xE59A5C), SectionCaptionText = H(0x2E241C),
-                    TabLog = H(0x82A9DE), TabDos = H(0x8CC67E), TabVice = H(0xE58074), TabGames = H(0xEBA35E), TabAdapter = H(0xE6CF6A)
+                    TabLog = H(0x82A9DE), TabDos = H(0x8CC67E), TabVice = H(0xE58074), TabGames = H(0xEBA35E), TabAdapter = H(0xE6CF6A), TabArchive = H(0x6FC2C2)
                 };
                 // Rosé Pine (variante Dawn per l'interfaccia, Moon per registro e schermo)
                 case "Rosé Pine": return new Palette
@@ -189,7 +189,7 @@ namespace XumerTool
                     LogBack = H(0x2A273F), LogText = H(0xE0DEF4), LogSent = H(0xC4A7E7), LogReply = H(0x9CCFD8), LogError = H(0xEB6F92), LogTime = H(0x6E6A86),
                     InputBack = H(0x44415A), InputText = H(0xE0DEF4), FieldBack = H(0xFFFAF3), FieldText = H(0x575279),
                     SectionDisk = H(0x7E6A99), SectionFile = H(0x3F7F8A), SectionImage = H(0xC2706C), SectionCaptionText = H(0xFFFAF3),
-                    TabLog = H(0x9CCFD8), TabDos = H(0xF6C177), TabVice = H(0xEB6F92), TabGames = H(0xC4A7E7), TabAdapter = H(0xEA9A97)
+                    TabLog = H(0x9CCFD8), TabDos = H(0xF6C177), TabVice = H(0xEB6F92), TabGames = H(0xC4A7E7), TabAdapter = H(0xEA9A97), TabArchive = H(0xEBBCBA)
                 };
                 case "Catppuccin": return new Palette
                 {
@@ -203,7 +203,7 @@ namespace XumerTool
                     LogBack = H(0x11111B), LogText = H(0xBAC2DE), LogSent = H(0x89DCEB), LogReply = H(0xA6E3A1), LogError = H(0xF38BA8), LogTime = H(0x6C7086),
                     InputBack = H(0x313244), InputText = H(0xCDD6F4), FieldBack = H(0x1E1E2E), FieldText = H(0xCDD6F4),
                     SectionDisk = H(0xB4BEFE), SectionFile = H(0x94E2D5), SectionImage = H(0xFAB387), SectionCaptionText = H(0x11111B),
-                    TabLog = H(0x89B4FA), TabDos = H(0xA6E3A1), TabVice = H(0xF5C2E7), TabGames = H(0xCBA6F7), TabAdapter = H(0xF9E2AF)
+                    TabLog = H(0x89B4FA), TabDos = H(0xA6E3A1), TabVice = H(0xF5C2E7), TabGames = H(0xCBA6F7), TabAdapter = H(0xF9E2AF), TabArchive = H(0x94E2D5)
                 };
                 case "Everforest": return new Palette
                 {
@@ -217,7 +217,7 @@ namespace XumerTool
                     LogBack = H(0x232A2E), LogText = H(0xD3C6AA), LogSent = H(0x7FBBB3), LogReply = H(0xA7C080), LogError = H(0xE67E80), LogTime = H(0x7A8478),
                     InputBack = H(0x343F44), InputText = H(0xD3C6AA), FieldBack = H(0x2D353B), FieldText = H(0xD3C6AA),
                     SectionDisk = H(0x7FBBB3), SectionFile = H(0x83C092), SectionImage = H(0xE69875), SectionCaptionText = H(0x232A2E),
-                    TabLog = H(0x7FBBB3), TabDos = H(0xA7C080), TabVice = H(0xD699B6), TabGames = H(0xDBBC7F), TabAdapter = H(0xE69875)
+                    TabLog = H(0x7FBBB3), TabDos = H(0xA7C080), TabVice = H(0xD699B6), TabGames = H(0xDBBC7F), TabAdapter = H(0xE69875), TabArchive = H(0x83C092)
                 };
                 case "Gruvbox": return new Palette
                 {
@@ -231,7 +231,7 @@ namespace XumerTool
                     LogBack = H(0x1D2021), LogText = H(0xD5C4A1), LogSent = H(0x83A598), LogReply = H(0xB8BB26), LogError = H(0xFB4934), LogTime = H(0x7C6F64),
                     InputBack = H(0x3C3836), InputText = H(0xEBDBB2), FieldBack = H(0x282828), FieldText = H(0xEBDBB2),
                     SectionDisk = H(0x83A598), SectionFile = H(0x8EC07C), SectionImage = H(0xE78A4E), SectionCaptionText = H(0x1D2021),
-                    TabLog = H(0x83A598), TabDos = H(0xB8BB26), TabVice = H(0xD3869B), TabGames = H(0x8EC07C), TabAdapter = H(0xE78A4E)
+                    TabLog = H(0x83A598), TabDos = H(0xB8BB26), TabVice = H(0xD3869B), TabGames = H(0x8EC07C), TabAdapter = H(0xE78A4E), TabArchive = H(0xFABD2F)
                 };
                 case "Nord": return new Palette
                 {
@@ -245,7 +245,7 @@ namespace XumerTool
                     LogBack = H(0x242933), LogText = H(0xD8DEE9), LogSent = H(0x81A1C1), LogReply = H(0xA3BE8C), LogError = H(0xBF616A), LogTime = H(0x616E88),
                     InputBack = H(0x3B4252), InputText = H(0xECEFF4), FieldBack = H(0x2E3440), FieldText = H(0xE5E9F0),
                     SectionDisk = H(0x81A1C1), SectionFile = H(0x8FBCBB), SectionImage = H(0xD08770), SectionCaptionText = H(0x242933),
-                    TabLog = H(0x88C0D0), TabDos = H(0xA3BE8C), TabVice = H(0xB48EAD), TabGames = H(0xEBCB8B), TabAdapter = H(0xD08770)
+                    TabLog = H(0x88C0D0), TabDos = H(0xA3BE8C), TabVice = H(0xB48EAD), TabGames = H(0xEBCB8B), TabAdapter = H(0xD08770), TabArchive = H(0x8FBCBB)
                 };
                 // Lunar Tear: ispirato ai colori del tema per Blender "Lunar Tear UI" (Raze-Demon):
                 // blu-verde della notte quasi nero, luce di luna azzurra, verde acqua, oliva e un tocco d'arancio.
@@ -261,7 +261,7 @@ namespace XumerTool
                     LogBack = H(0x081018), LogText = H(0xC2C8C4), LogSent = H(0x6DAFE9), LogReply = H(0x6CC0A8), LogError = H(0xE07A5F), LogTime = H(0x55666B),
                     InputBack = H(0x16232F), InputText = H(0xD6DCDA), FieldBack = H(0x0F1B25), FieldText = H(0xD6DCDA),
                     SectionDisk = H(0x4A9BD0), SectionFile = H(0x3FA595), SectionImage = H(0xC9B458), SectionCaptionText = H(0x061018),
-                    TabLog = H(0x6DAFE9), TabDos = H(0x6CC0A8), TabVice = H(0xE0874F), TabGames = H(0xC9B458), TabAdapter = H(0x9DBB6E)
+                    TabLog = H(0x6DAFE9), TabDos = H(0x6CC0A8), TabVice = H(0xE0874F), TabGames = H(0xC9B458), TabAdapter = H(0x9DBB6E), TabArchive = H(0x5FC4C4)
                 };
                 default: return new Palette
                 {
@@ -275,7 +275,7 @@ namespace XumerTool
                     LogBack = H(0x111827), LogText = H(0xD1D5DB), LogSent = H(0x93C5FD), LogReply = H(0x86EFAC), LogError = H(0xFCA5A5), LogTime = H(0x6B7280),
                     InputBack = H(0x374151), InputText = Color.White, FieldBack = Color.White, FieldText = H(0x111827),
                     SectionDisk = H(0x4F46E5), SectionFile = H(0x0D9488), SectionImage = H(0xEA580C), SectionCaptionText = Color.White,
-                    TabLog = H(0x38BDF8), TabDos = H(0xA3E635), TabVice = H(0xF472B6), TabGames = H(0xC084FC), TabAdapter = H(0xFACC15)
+                    TabLog = H(0x38BDF8), TabDos = H(0xA3E635), TabVice = H(0xF472B6), TabGames = H(0xC084FC), TabAdapter = H(0xFACC15), TabArchive = H(0x2DD4BF)
                 };
             }
         }
@@ -333,14 +333,21 @@ namespace XumerTool
         /// </summary>
         public static Image AppLogo()
         {
-            try
+            // il PNG si decodifica una volta sola; ogni chiamata riceve una copia sua (chi la usa può eliminarla)
+            if (appLogo == null)
             {
-                using (Stream s = typeof(Theme).Assembly.GetManifestResourceStream("app-icona.png"))
-                    if (s != null) using (Image img = Image.FromStream(s)) return new Bitmap(img);
+                try
+                {
+                    using (Stream s = typeof(Theme).Assembly.GetManifestResourceStream("app-icona.png"))
+                        if (s != null) using (Image img = Image.FromStream(s)) appLogo = new Bitmap(img);
+                }
+                catch { }
+                if (appLogo == null) appLogo = MakeAppIcon().ToBitmap();
             }
-            catch { }
-            return MakeAppIcon().ToBitmap();
+            return new Bitmap(appLogo);
         }
+
+        static Bitmap appLogo;
 
         /// <summary>Il logo rimpicciolito con cura (a passi, per restare nitido nelle misure piccole).</summary>
         public static Bitmap AppLogo(int size)
@@ -540,7 +547,8 @@ namespace XumerTool
         }
     }
 
-    enum ButtonKind { Toolbar, Header, Accent }
+    /// <summary>Ribbon = barra a nastro: icona sopra, didascalia piccola (facoltativa) sotto.</summary>
+    enum ButtonKind { Toolbar, Header, Accent, Ribbon }
 
     /// <summary>Pulsante piatto con icona (glifo) e testo.</summary>
     class IconButton : Button
@@ -550,7 +558,21 @@ namespace XumerTool
         public Color IconColor = Color.Empty;   // vuoto = Theme.Icon
         public Color HoverColor = Color.Empty;  // vuoto = derivato dal tema
         public Color PressedColor = Color.Empty;
-        public string LongText, ShortText;      // testi alternativi per le barre che si adattano alla larghezza
+        public string LongText;                 // testo completo (la barra a nastro toglie le didascalie quando stringe)
+        public bool BoltBadge;                  // fulmine sovrapposto all'icona (copia veloce)
+        public Color BadgeColor = Color.FromArgb(0xF5, 0xB8, 0x00);
+        // barra a nastro: fascia col nome del comando dentro il pulsante (tutto il tassello è cliccabile)
+        public Color BandColor = Color.Empty, BodyColor = Color.Empty;
+        string header;
+        public string Header
+        {
+            get { return header; }
+            set { header = value; if (AutoSize) Size = GetPreferredSize(Size.Empty); Invalidate(); }
+        }
+        public static int BandHeight { get { return Theme.S(20); } }
+        public static int RibbonBodyHeight { get { return Theme.S(40); } }
+        static Font bandFont;
+        public static Font BandFont { get { if (bandFont == null) bandFont = new Font("Segoe UI", 8.5f); return bandFont; } }
         bool hover, down, compact;
         static ToolTip tips;
 
@@ -597,8 +619,19 @@ namespace XumerTool
 
         bool HasIcon { get { return !string.IsNullOrEmpty(Glyph) && Theme.IconFont != null; } }
 
+        static Font ribbonFont;
+        static Font RibbonFont { get { if (ribbonFont == null) ribbonFont = new Font("Segoe UI", 7.5f); return ribbonFont; } }
+
         public override Size GetPreferredSize(Size proposed)
         {
+            if (Kind == ButtonKind.Ribbon)
+            {
+                // icona sopra, didascalia sotto (se c'è); stessa altezza per tutti i tasselli, la fascia del nome (se c'è) sta sopra
+                int rw = Theme.S(44);
+                if (!string.IsNullOrEmpty(Text)) rw = Math.Max(rw, TextRenderer.MeasureText(Text, RibbonFont, Size.Empty, TextFormatFlags.NoPadding).Width + Theme.S(14));
+                if (!string.IsNullOrEmpty(header)) rw = Math.Max(rw, TextRenderer.MeasureText(header, BandFont, Size.Empty, TextFormatFlags.NoPadding).Width + Theme.S(32));
+                return new Size(rw, (string.IsNullOrEmpty(header) ? 0 : BandHeight) + RibbonBodyHeight);
+            }
             Size t = TextRenderer.MeasureText(Text, Font, Size.Empty, TextFormatFlags.NoPadding);
             if (compact && HasIcon)
             {
@@ -643,7 +676,7 @@ namespace XumerTool
             }
             if (!Enabled)
             {
-                if (Kind == ButtonKind.Toolbar)
+                if (Kind == ButtonKind.Toolbar || Kind == ButtonKind.Ribbon)
                 {
                     fore = Theme.Blend(Theme.Text, parentBack, 0.6f);
                     icon = fore;
@@ -657,23 +690,70 @@ namespace XumerTool
             }
 
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
-            using (GraphicsPath p = Theme.Rounded(r, Theme.S(6)))
-            using (SolidBrush b = new SolidBrush(back))
-                g.FillPath(b, p);
+            if (Kind == ButtonKind.Ribbon)
+            {
+                // tassello squadrato: corpo nel colore tenue della sezione (più scuro al passaggio del mouse)
+                if (!BodyColor.IsEmpty && !down && !hover) back = BodyColor;
+                using (SolidBrush b = new SolidBrush(back)) g.FillRectangle(b, 0, 0, Width, Height);
+                if (!string.IsNullOrEmpty(header))
+                {
+                    Color band = BandColor.IsEmpty ? back : BandColor;
+                    if (hover || down) band = Theme.Blend(band, Theme.Text, down ? 0.16f : 0.08f);
+                    using (SolidBrush b = new SolidBrush(band)) g.FillRectangle(b, 0, 0, Width, BandHeight);
+                    TextRenderer.DrawText(g, header, BandFont, new Rectangle(0, 0, Width, BandHeight), Enabled ? Theme.Text : fore,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                }
+            }
+            else
+                using (GraphicsPath p = Theme.Rounded(r, Theme.S(6)))
+                using (SolidBrush b = new SolidBrush(back))
+                    g.FillPath(b, p);
 
             int x = Theme.S(10);
-            if (compact && HasIcon)
+            Rectangle iconRect = Rectangle.Empty;
+            if (Kind == ButtonKind.Ribbon)
+            {
+                bool caption = !string.IsNullOrEmpty(Text);
+                // icona (e didascalia, se c'è) centrate in verticale nel corpo del tassello
+                int bodyTop = string.IsNullOrEmpty(header) ? 0 : BandHeight;
+                int block = Theme.S(18) + (caption ? Theme.S(13) : 0);
+                int top = bodyTop + (Height - bodyTop - block) / 2;
+                iconRect = new Rectangle((Width - Theme.S(16)) / 2, top + Theme.S(1), Theme.S(16), Theme.S(16));
+                if (HasIcon)
+                    TextRenderer.DrawText(g, Glyph, Theme.IconFont, new Rectangle(0, top, Width, Theme.S(18)), icon,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                if (caption)
+                    TextRenderer.DrawText(g, Text, RibbonFont, new Rectangle(0, top + Theme.S(19), Width, Height - top - Theme.S(20)), fore,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.Top | TextFormatFlags.NoPadding);
+            }
+            else if (compact && HasIcon)
             {
                 TextRenderer.DrawText(g, Glyph, Theme.IconFont, new Rectangle(0, 0, Width, Height), icon,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                iconRect = new Rectangle((Width - Theme.S(16)) / 2, (Height - Theme.S(16)) / 2, Theme.S(16), Theme.S(16));
             }
             else if (HasIcon)
             {
                 Rectangle ir = new Rectangle(x, 0, Theme.S(16), Height);
                 TextRenderer.DrawText(g, Glyph, Theme.IconFont, ir, icon, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                iconRect = new Rectangle(x, (Height - Theme.S(16)) / 2, Theme.S(16), Theme.S(16));
                 x += Theme.S(16) + Theme.S(7);
             }
-            if (!(compact && HasIcon))
+            if (BoltBadge && HasIcon)
+            {
+                // fulmine pieno in alto a destra dell'icona (copia veloce), con un bordino del colore di fondo
+                float s = Theme.S(13);
+                float bx = iconRect.Right - s * 0.55f, by = iconRect.Top - s * 0.35f;
+                PointF[] bolt =
+                {
+                    new PointF(bx + s * 0.62f, by), new PointF(bx + s * 0.12f, by + s * 0.58f), new PointF(bx + s * 0.44f, by + s * 0.58f),
+                    new PointF(bx + s * 0.30f, by + s), new PointF(bx + s * 0.88f, by + s * 0.38f), new PointF(bx + s * 0.55f, by + s * 0.38f),
+                    new PointF(bx + s * 0.74f, by)
+                };
+                using (Pen edge = new Pen(back, Math.Max(2f, Theme.S(2))) { LineJoin = LineJoin.Round }) g.DrawPolygon(edge, bolt);
+                using (SolidBrush fill = new SolidBrush(Enabled ? BadgeColor : icon)) g.FillPolygon(fill, bolt);
+            }
+            if (!(compact && HasIcon) && Kind != ButtonKind.Ribbon)
             {
                 Rectangle tr = new Rectangle(x, 0, Width - x - Theme.S(6), Height);
                 TextRenderer.DrawText(g, Text, Font, tr, fore, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
@@ -716,7 +796,10 @@ namespace XumerTool
         }
     }
 
-    /// <summary>Barra di avanzamento sottile nei colori del tema.</summary>
+    /// <summary>
+    /// Barra di avanzamento a blocchi in stile PETSCII: celle quadrate piene, la cella in corso
+    /// riempita a quarti (come i caratteri a blocchi del C64), quelle vuote a scacchiera.
+    /// </summary>
     class SlimProgress : Control
     {
         int max = 100, val;
@@ -731,17 +814,37 @@ namespace XumerTool
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.Clear(Parent != null ? Parent.BackColor : Theme.Surface);
-            int h = Math.Min(Height, Theme.S(8));
-            Rectangle track = new Rectangle(0, (Height - h) / 2, Width - 1, h);
-            using (GraphicsPath p = Theme.Rounded(track, h / 2))
-            using (SolidBrush b = new SolidBrush(Theme.Border)) g.FillPath(b, p);
-            int w = (int)((long)track.Width * val / max);
-            if (w >= h)
+            Color back = Parent != null ? Parent.BackColor : Theme.Surface;
+            g.Clear(back);
+            g.SmoothingMode = SmoothingMode.None;
+            int cell = Math.Max(4, Math.Min(Height, Theme.S(10)));
+            int gap = Math.Max(1, Theme.S(2));
+            int n = Math.Max(1, (Width + gap) / (cell + gap));
+            int y = (Height - cell) / 2;
+            // avanzamento in quarti di cella
+            int quarters = (int)((long)n * 4 * val / max);
+            int dot = Math.Max(1, cell / 5);   // lato dei quadratini della scacchiera
+            using (SolidBrush fill = new SolidBrush(Theme.Accent))
+            using (SolidBrush empty = new SolidBrush(Theme.Blend(back, Theme.Border, 0.9f)))
+            using (SolidBrush shade = new SolidBrush(Theme.Blend(back, Theme.Accent, 0.22f)))
             {
-                using (GraphicsPath p = Theme.Rounded(new Rectangle(track.X, track.Y, w, h), h / 2))
-                using (SolidBrush b = new SolidBrush(Theme.Accent)) g.FillPath(b, p);
+                for (int i = 0; i < n; i++)
+                {
+                    int x = i * (cell + gap);
+                    int q = Math.Max(0, Math.Min(4, quarters - i * 4));
+                    if (q == 4) { g.FillRectangle(fill, x, y, cell, cell); continue; }
+                    if (q > 0)
+                    {
+                        // cella in corso: fondo tenue + parte sinistra piena (1/4, 1/2, 3/4)
+                        g.FillRectangle(shade, x, y, cell, cell);
+                        g.FillRectangle(fill, x, y, cell * q / 4, cell);
+                        continue;
+                    }
+                    // cella vuota: scacchiera come il carattere PETSCII a retino
+                    for (int yy = 0; yy < cell; yy += dot)
+                        for (int xx = ((yy / dot) % 2) * dot; xx < cell; xx += dot * 2)
+                            g.FillRectangle(empty, x + xx, y + yy, Math.Min(dot, cell - xx), Math.Min(dot, cell - yy));
+                }
             }
         }
     }
@@ -765,10 +868,15 @@ namespace XumerTool
             }
         }
 
-        int SegW { get { return Theme.S(34); } }
+        readonly int segWidth;
+        int SegW { get { return segWidth > 0 ? segWidth : Theme.S(34); } }
 
-        public Segmented(params string[] items)
+        public Segmented(params string[] items) : this(0, items) { }
+
+        /// <summary>Con segWidth &gt; 0 i segmenti hanno quella larghezza (per etichette di testo).</summary>
+        public Segmented(int segWidth, params string[] items)
         {
+            this.segWidth = segWidth;
             this.items = items;
             Font = new Font("Segoe UI Semibold", 9.5f);
             Cursor = Cursors.Hand;

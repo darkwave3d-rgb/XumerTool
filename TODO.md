@@ -6,18 +6,18 @@
 
 - Writing the firmware to the Pro Micro (Adapter tab → Install firmware). Recommended first test: reinstall xum1541 v08, with the IEC cable unplugged.
 - Downloading the firmware and Zadig from GitHub (Adapter tab → Required tools).
-- Full installer (`bin\XUMER-TOOL-Setup.exe`): Start menu and Desktop shortcuts, "Installed apps" entry, uninstall. So far only tested in a test folder.
+- Fast copy with D71 images and with a 1541.
+- Disk map and drive LEDs during a long copy.
 - Games Floppy Runner (new graphics) and PETSCII Assault, screen saver: only tested with static screenshots.
 - Preferences: theme drop-down list (mouse and arrow keys), changing theme and font, then Save.
 - Narrow window dragged by hand: the toolbars compact themselves, tooltips appear on the icons.
-- New icon in the Windows taskbar and Start menu, after reinstalling.
+- New icon in the Windows taskbar.
 
 ## Big jobs, in order
 
-1. **Fast copy (S2 protocol)** – status on 2026-11-18: code complete (`src/FastCopy.cs`: `ReadImageFast`/`WriteImageFast`; `src/Asm6502.cs`; `drivecode/*.a65`), it compiles, but nothing calls it yet and it has never been tested on a real drive.
-   - **Interface**: the fast commands go into a **separate "Experimental" menu** (e.g. "Create image (fast)", "Write image (fast)"), with a warning the first time. The normal Create/Write image stay slow and safe.
-   - Steps, safest first: 1) check the assembler output against OpenCBM; 2) add `xumtest.exe 8 fast-read disk.d64` and test read-only, comparing the image with the one from the slow copy (they must be identical); 3) writing to a disk you can sacrifice, only when the user starts it; 4) Experimental menu in the app, falling back to the slow copy on errors.
-   - Expected result: a whole disk in less than a minute, instead of about 10.
+1. **Fast copy (S2 protocol)** – D64 reading tested on a 1571 (about one minute instead of ten), in the "fast" tile of "create image", falling back to the normal copy on errors.
+   - Still to test: D71 images and the 1541 drive.
+   - Fast writing (`WriteImageFast`): to be tested on a disk you can sacrifice, then added as a "fast" tile in "write image".
 2. **The drive as a Windows drive letter (e.g. Z:)**
    - The disk in the 1571 shows up in File Explorer as a normal drive.
    - Needs the free WinFsp driver; XUMER TOOL acts as a bridge to the adapter.
@@ -29,13 +29,14 @@
 
 ## Proposed ideas (to be chosen)
 
-My picks: D64 viewer, animated disk map, drive animation with the LED.
+My picks: D64 viewer, file preview.
 
 ### Features
 
+- **Internet Archive**: the Internet Archive tab connects the app to an archive.org account; the next step is uploading disk images there directly from the app.
 - **D64/D71/D81 image viewer**: open an image from the PC and see its directory on the blue screen; extract files, run them in VICE, write it to a disk. Works without a drive.
 - **File preview**: decoded BASIC listing, SEQ text, hex view.
 - **Disk → disk copy** in a single pass.
-- **Disk map (BAM)**: grid of tracks and sectors in colors (free, used, with errors), filling up while reading.
+- **BAM map**: free and used blocks of the disk, without having to copy it.
 - **Floppy archive**: list of the images created, with search ("which floppy had…?").
 - **Verify after writing** an image.

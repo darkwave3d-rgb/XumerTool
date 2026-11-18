@@ -145,15 +145,27 @@ namespace XumerTool
 
     public enum ImageKind { D64, D71, D81 }
 
+    /// <summary>Stato di un settore durante la copia di un'immagine (per la mappa del disco).</summary>
+    public static class BlockState
+    {
+        public const byte Pending = 0, Working = 1, Done = 2, Error = 3;
+    }
+
     public partial class CbmDrive
     {
         readonly Xum1541 x;
         public int Dev = 8;
         public Action<string> Log = delegate { };
         public Action<int, int> Progress = delegate { };
+        /// <summary>Stato di un settore durante le copie di immagini (traccia, settore, BlockState).</summary>
+        public Action<int, int, byte> Block = delegate { };
         public volatile bool Cancel;
 
-        public CbmDrive(Xum1541 xum) { x = xum; }
+        public CbmDrive(Xum1541 xum)
+        {
+            x = xum;
+            x.Cancelled = delegate { return Cancel; };
+        }
 
         void CheckCancel()
         {
@@ -408,6 +420,7 @@ namespace XumerTool
                     for (int s = 0; s < spt; s++, i++)
                     {
                         CheckCancel();
+                        Block(t, s, BlockState.Working);
                         SendCommand(Petscii.FromText("U1 2 0 " + t + " " + s), false);
                         string st = ReadStatus(false);
                         int code = StatusCode(st);
@@ -417,6 +430,7 @@ namespace XumerTool
                             anyError = true;
                             err[i] = (byte)(code >= 20 && code <= 29 ? code - 18 : 15);
                             Log(string.Format(Lang.T("Errore traccia {0} settore {1}: {2}"), t, s, st));
+                            Block(t, s, BlockState.Error);
                         }
                         else
                         {
@@ -424,7 +438,11 @@ namespace XumerTool
                             if (!x.Talk(Dev, 2)) NotPresent();
                             byte[] b = x.RawRead(256);
                             x.Untalk();
-                            Array.Copy(b, 0, img, i * 256, Math.Min(256, b.Length));
+                            // un settore incompleto non va mai accettato come buono: l'immagine sarebbe rovinata in silenzio
+                            if (b.Length != 256)
+                                throw new IOException(string.Format(Lang.T("Settore incompleto (traccia {0} settore {1}: {2} byte su 256)"), t, s, b.Length));
+                            Array.Copy(b, 0, img, i * 256, 256);
+                            Block(t, s, BlockState.Done);
                         }
                         Progress(i + 1, total);
                     }
@@ -476,6 +494,7 @@ namespace XumerTool
                     for (int s = 0; s < spt; s++, i++)
                     {
                         CheckCancel();
+                        Block(t, s, BlockState.Working);
                         SendCommand(Petscii.FromText("B-P 2 0"), false);
                         if (!x.Listen(Dev, 2)) NotPresent();
                         int w = x.RawWrite(img, i * 256, 256);
@@ -484,7 +503,11 @@ namespace XumerTool
                         SendCommand(Petscii.FromText("U2 2 0 " + t + " " + s), false);
                         string st = ReadStatus(false);
                         if (StatusCode(st) >= 20)
+                        {
+                            Block(t, s, BlockState.Error);
                             throw new DriveException(string.Format(Lang.T("Errore scrittura traccia {0} settore {1}: {2}"), t, s, st));
+                        }
+                        Block(t, s, BlockState.Done);
                         Progress(i + 1, total);
                     }
                 }

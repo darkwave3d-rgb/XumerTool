@@ -1,4 +1,4 @@
-// Finestra "Preferenze": tema, carattere della directory, salvaschermo e avvio.
+﻿// Finestra "Preferenze": tema, carattere della directory, salvaschermo e avvio.
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -111,7 +111,7 @@ namespace XumerTool
                 // console: schede e registro
                 float cy = Y + Hh * 0.67f, chh = Hh * 0.29f;
                 Fill(g, p.LogBack, X + pad, cy, W - 2 * pad, chh);
-                Color[] tabs = { p.TabAdapter, p.TabLog, p.TabDos, p.TabVice, p.TabGames };
+                Color[] tabs = { p.TabAdapter, p.TabLog, p.TabDos, p.TabVice, p.TabArchive, p.TabGames };
                 float tabH = chh * 0.22f, tx = X + pad + W * 0.02f;
                 for (int i = 0; i < tabs.Length; i++)
                 {

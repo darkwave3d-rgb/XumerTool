@@ -10,27 +10,19 @@ namespace XumerTool
     {
         public static readonly string[] Machines = { Lang.T("C64 (x64sc)"), Lang.T("C128 (x128)") };
 
-        /// <summary>Cerca x64sc.exe: prima nelle impostazioni, poi nelle cartelle più comuni.</summary>
-        static bool searched;
-
-        /// <summary>
-        /// Trova VICE. Il risultato viene salvato, così le chiamate successive sono immediate;
-        /// con force = true rifà comunque la ricerca sul disco.
-        /// </summary>
-        public static string Find(bool force = false)
+        /// <summary>Il percorso di VICE salvato nelle impostazioni, se esiste ancora (immediato, nessuna ricerca).</summary>
+        public static string Saved()
         {
             string saved = Settings.Get("vice", "");
-            if (saved.Length > 0 && File.Exists(saved)) return saved;
-            if (searched && !force) return null;
-            searched = true;
-            string found = Scan();
-            if (found != null) Settings.Set("vice", found);
-            return found;
+            return saved.Length > 0 && File.Exists(saved) ? saved : null;
         }
 
-        static string Scan()
+        /// <summary>
+        /// Cerca x64sc.exe nelle cartelle più comuni. Può durare alcuni secondi:
+        /// va chiamata da un thread in sottofondo, mai da quello dell'interfaccia.
+        /// </summary>
+        public static string Scan()
         {
-
             List<string> roots = new List<string>();
             foreach (Environment.SpecialFolder f in new[] { Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86,
                                                             Environment.SpecialFolder.Desktop, Environment.SpecialFolder.LocalApplicationData })

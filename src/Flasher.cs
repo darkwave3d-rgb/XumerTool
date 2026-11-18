@@ -104,7 +104,7 @@ namespace XumerTool
             for (int a = 0; a < total; a += block)
             {
                 int w = a / 2;
-                Expect(new byte[] { (byte)'A', (byte)(w >> 8), (byte)w }, "indirizzo");
+                Expect(new byte[] { (byte)'A', (byte)(w >> 8), (byte)w }, Lang.T("indirizzo"));
                 byte[] cmd = new byte[4 + block];
                 cmd[0] = (byte)'B'; cmd[1] = (byte)(block >> 8); cmd[2] = (byte)block; cmd[3] = (byte)'F';
                 Array.Copy(img, a, cmd, 4, block);
@@ -115,7 +115,7 @@ namespace XumerTool
             for (int a = 0; a < total; a += block)
             {
                 int w = a / 2;
-                Expect(new byte[] { (byte)'A', (byte)(w >> 8), (byte)w }, "indirizzo");
+                Expect(new byte[] { (byte)'A', (byte)(w >> 8), (byte)w }, Lang.T("indirizzo"));
                 byte[] data = Cmd(new byte[] { (byte)'g', (byte)(block >> 8), (byte)block, (byte)'F' }, block);
                 for (int i = 0; i < block; i++)
                     if (data[i] != img[a + i])
@@ -123,7 +123,7 @@ namespace XumerTool
                 progress(total + a + block, total * 2);
             }
             Expect(new[] { (byte)'L' }, Lang.T("fine programmazione"));
-            try { Expect(new[] { (byte)'E' }, "uscita"); } catch (Exception) { } // il chip si riavvia subito
+            try { Expect(new[] { (byte)'E' }, Lang.T("uscita")); } catch (Exception) { } // il chip si riavvia subito
         }
 
         /// <summary>Aspetta che compaia una nuova porta seriale (il bootloader del Pro Micro).</summary>

@@ -9,7 +9,7 @@
 <p align="center">
   Windows program to use Commodore <b>1541</b>, <b>1571</b> and <b>1581</b> disk drives from the PC,<br>
   with the <b>xum1541</b> USB adapter.<br>
-  <i>Version 1.1b · beta · Italian and English</i>
+  <i>Version 1.2b · beta · Italian and English</i>
 </p>
 
 <p align="center">
@@ -20,16 +20,21 @@
 
 - **Disk**: directory on the blue C64 screen, validate, format.
 - **Files**: save files from the disk to the PC and write PC files to the disk (PRG, SEQ, P00), rename, delete. You can also drag files onto the blue screen.
-- **Disk images**: create and write **D64**, **D71** (1571 double-sided) and **D81** images.
-- **DOS commands**: command line with a list of ready-made commands and drive status reading.
+- **Disk images**: create and write **D64**, **D71** (1571 double-sided) and **D81** images, with a disk map that fills in sector by sector. Plus the experimental **fast copy** (OpenCBM's S2 protocol): a whole disk in about one minute.
+- **DOS commands**: command line with a list of ready-made commands, drive status reading and a legend of the error messages with an explanation and what to do.
 - **VICE**: run a program, an image or the whole disk in the emulator.
+- **Internet Archive**: connect your archive.org account to preserve your disk images (uploading will come in the next version).
 - **Adapter**: automatic connection, WinUSB driver check, Zadig download, xum1541 firmware writing to the Pro Micro.
-- **Atmosphere**: 10 themes, 10 retro fonts, original games and a PETSCII screen saver.
+- **Atmosphere**: 10 themes, 10 retro fonts, a drive with LEDs in the header, pixel file icons, a PETSCII block progress bar, original games and a screen saver.
 - **Languages**: Italian and English (Preferences → Language). On first start it follows the Windows language.
 
 <p align="center">
   <img src="docs/en-lunar-tear.png" width="49%" alt="Lunar Tear theme with the Adapter tab">
   <img src="docs/en-commodore.png" width="49%" alt="Commodore theme with the DOS commands tab">
+</p>
+
+<p align="center">
+  <img src="docs/en-disk-map.png" width="820" alt="Disk map while creating a D71 image: both sides, with sectors read, sectors still to read and a few errors">
 </p>
 
 ## Requirements
@@ -42,7 +47,7 @@
 
 ## Installation
 
-1. Download `XUMER-TOOL-Setup.exe` from the **Releases** page and run it. No administrator rights are needed: the program is installed for your user only. The installer follows the Windows language.
+1. Download `XumerTool-1.2b-portable.zip` from the **Releases** page, extract the `XUMER TOOL` folder wherever you like and run `XumerTool.exe`. Nothing needs to be installed; to remove it, just delete the folder.
 2. Install the driver with Zadig: *Options → List All Devices*, choose **xum1541**, then **WinUSB** and **Install Driver**.
 3. Connect the adapter to the drive and to the PC and turn on the drive.
 4. Start XUMER TOOL: it connects by itself. Press **Directory**.
@@ -51,12 +56,14 @@
 
 ## Project status (beta)
 
-Tested with real hardware: xum1541 on an Arduino Pro Micro (OpenCBM v08 firmware) and a Commodore 1571.
+Tested with real hardware: xum1541 on an Arduino Pro Micro (OpenCBM v08 firmware), a Commodore 1571 and a 1541 (reading and formatting).
+
+Fast copy reading is tested with a 1571 and D64 images.
 
 Still **to be tested on hardware**, use with care:
-- fast copy (S2 protocol);
+- fast copy with D71 images and with a 1541;
 - writing the firmware to the Pro Micro;
-- 1541 and 1581 drives (and therefore D81 images): they are supported, but the program has only been tested with a 1571.
+- the 1581 drive (and therefore D81 images): it is supported, but not tested yet.
 
 What's new in each version is in the [changelog](CHANGELOG.en.md); planned work is in the [to-do list](TODO.md).
 
@@ -76,7 +83,7 @@ No Visual Studio needed: the C# compiler included in Windows (.NET Framework 4) 
 
 ```
 build.bat             → bin\XumerTool.exe and bin\xumtest.exe
-build-installer.bat   → also bin\XUMER-TOOL-Setup.exe
+build-portable.bat    → also bin\XumerTool-<version>-portable.zip (the published version)
 ```
 
 The code is C# 5 with Windows Forms; the adapter is used through WinUSB, with no external libraries. Code comments are in Italian.
@@ -85,10 +92,10 @@ The code is C# 5 with Windows Forms; the adapter is used through WinUSB, with no
 |---|---|
 | `src` | the program (xum1541 protocol, Commodore DOS, interface) |
 | `drivecode` | 6502 routines that run inside the drive for fast copy |
-| `installer` | installer and uninstaller |
+| `installer` | LEGGIMI/README texts included in the zip; installer (set aside for now) |
 | `fonts` | retro fonts with their licenses |
 | `lang` | translations (`en.txt`) |
-| `tools` | tools for the icon and the translations |
+| `tools` | tools for the icon, the translations and checking the 6502 assembler (`AsmCheck`) |
 | `test` | command-line test: `xumtest.exe 8 dir` |
 
 ### Translating into another language

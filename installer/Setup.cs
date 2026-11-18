@@ -19,7 +19,7 @@ namespace XumSetup
     static class Product
     {
         public const string Name = "XUMER TOOL";
-        public const string Version = "1.1b";   // "b" = beta
+        public const string Version = "1.2b";   // "b" = beta
         public const string Publisher = "darkwave3D";
         public const string Exe = "XumerTool.exe";
         public const string OldExe = "XumTool.exe";   // nome dell'eseguibile fino alla 1.0b del 18/11/2026
@@ -96,7 +96,7 @@ namespace XumSetup
                     s.CopyTo(fs);
             }
             // il disinstallatore è una copia dell'installer stesso
-            string uninstaller = Path.Combine(dir, "Disinstalla.exe");
+            string uninstaller = Path.Combine(dir, Uninstaller);
             if (!string.Equals(Path.GetFullPath(Application.ExecutablePath), Path.GetFullPath(uninstaller), StringComparison.OrdinalIgnoreCase))
                 File.Copy(Application.ExecutablePath, uninstaller, true);
 
@@ -179,23 +179,40 @@ namespace XumSetup
             if (removeSettings)
                 try { if (Directory.Exists(Product.SettingsDir)) Directory.Delete(Product.SettingsDir, true); } catch { }
 
-            // elimina i file; il disinstallatore in esecuzione viene eliminato subito dopo la chiusura
+            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return;
+            dir = Path.GetFullPath(dir).TrimEnd('\\');
+            // sicurezza: si tocca la cartella solo se contiene davvero XUMER TOOL,
+            // e si eliminano solo i file installati (mai il resto della cartella)
+            if (!File.Exists(Path.Combine(dir, Product.Exe)) && !File.Exists(Path.Combine(dir, Product.OldExe))) return;
+
             string self = Path.GetFullPath(Application.ExecutablePath);
-            foreach (string f in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
-                if (!string.Equals(Path.GetFullPath(f), self, StringComparison.OrdinalIgnoreCase))
-                    try { File.Delete(f); } catch { }
-            foreach (string d in Directory.GetDirectories(dir))
-                try { Directory.Delete(d, true); } catch { }
-            if (self.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+            List<string> files = new List<string>(Payload().Values);
+            files.Add(Product.Exe); files.Add(Product.OldExe); files.Add(Uninstaller);
+            List<string> subdirs = new List<string>();
+            foreach (string rel in files)
             {
+                string f = Path.GetFullPath(Path.Combine(dir, rel));
+                string sub = Path.GetDirectoryName(f);
+                if (!string.Equals(sub, dir, StringComparison.OrdinalIgnoreCase) && !subdirs.Contains(sub)) subdirs.Add(sub);
+                if (string.Equals(f, self, StringComparison.OrdinalIgnoreCase)) continue;   // eliminato dopo la chiusura
+                try { if (File.Exists(f)) File.Delete(f); } catch { }
+            }
+            // sottocartelle (es. Licenze) e cartella principale: solo se rimaste vuote
+            foreach (string d in subdirs)
+                try { if (Directory.Exists(d) && Directory.GetFileSystemEntries(d).Length == 0) Directory.Delete(d, false); } catch { }
+            if (string.Equals(Path.GetDirectoryName(self), dir, StringComparison.OrdinalIgnoreCase))
+            {
+                // il disinstallatore in esecuzione si elimina da sé dopo la chiusura (rmdir senza /s: solo se vuota)
                 ProcessStartInfo psi = new ProcessStartInfo("cmd.exe",
                     "/c ping 127.0.0.1 -n 3 >nul & del /f /q \"" + self + "\" & rmdir /q \"" + dir + "\"")
                 { CreateNoWindow = true, UseShellExecute = false, WindowStyle = ProcessWindowStyle.Hidden };
                 Process.Start(psi);
             }
             else
-                try { Directory.Delete(dir, false); } catch { }
+                try { if (Directory.GetFileSystemEntries(dir).Length == 0) Directory.Delete(dir, false); } catch { }
         }
+
+        const string Uninstaller = "Disinstalla.exe";
     }
 
     class SetupForm : Form
