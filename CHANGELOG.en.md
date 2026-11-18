@@ -17,7 +17,7 @@
 - The screen saver no longer starts while an operation is running.
 - Fixed: after connecting or reading the directory the buttons sometimes stayed disabled (they came back only by changing theme).
 - Faster startup: the search for VICE runs in the background.
-- Safer image reading: a sector that arrives incomplete gives an error instead of ending up in the image.
+- Safer image reading: a sector that arrives incomplete is read again (up to 3 times) instead of ending up damaged in the image.
 - Closing the program during an operation no longer makes it hang.
 
 ## 1.1b (beta) – 2026-11-18

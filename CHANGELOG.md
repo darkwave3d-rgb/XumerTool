@@ -17,7 +17,7 @@
 - Il salvaschermo non parte più durante un'operazione in corso.
 - Corretto: dopo il collegamento o la lettura della directory i pulsanti a volte restavano disattivati (si riattivavano solo cambiando tema).
 - Apertura più rapida: la ricerca di VICE avviene in sottofondo.
-- Lettura delle immagini più sicura: un settore arrivato incompleto dà errore invece di finire nell'immagine.
+- Lettura delle immagini più sicura: un settore arrivato incompleto viene riletto (fino a 3 volte) invece di finire rovinato nell'immagine.
 - Chiudere il programma durante un'operazione non lo fa più bloccare.
 
 ## 1.1b (beta) – 18/11/2026

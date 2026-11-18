@@ -94,6 +94,8 @@ namespace XumerTool
                     InternetArchive.Access = "esempio"; InternetArchive.Secret = "esempio"; InternetArchive.ScreenName = "darkwave3D";
                     f.RefreshArchiveStatePublic();
                 }
+                // offline: come senza drive collegato (pulsanti del drive disattivati)
+                if (Array.IndexOf(args, "offline") >= 0) f.DemoOffline();
                 // errors: la legenda dei messaggi nella scheda Comandi DOS, con un esempio nel registro
                 if (args.Length >= 5 && args[4] == "errors") f.DemoErrors();
                 // map / map71 / map81: la mappa del disco a metà di una copia
@@ -737,6 +739,14 @@ namespace XumerTool
             b.AutoSize = false;
             rc.Row.Controls.Add(b);
             rc.Variants.Add(b);
+            // la fascia comune si oscura con i suoi tasselli, come i nomi dei comandi singoli
+            b.EnabledChanged += delegate
+            {
+                bool any = false;
+                foreach (IconButton v in rc.Variants) any |= v.Enabled;
+                rc.Band.ForeColor = any ? Theme.Text : Theme.Blend(Theme.Text, Theme.Surface, 0.6f);
+                rc.Band.Cursor = any ? Cursors.Hand : Cursors.Default;
+            };
             return b;
         }
 
@@ -910,6 +920,7 @@ namespace XumerTool
                 SelectionMode = SelectionMode.MultiExtended, IntegralHeight = false, AllowDrop = true
             };
             lst.ItemHeight = lst.Font.Height + Theme.S(ScreenFonts.Current.Spacing);
+            entryIconCol = -1;   // colonna delle icone dei file: si rimisura con il carattere nuovo
             lst.DrawItem += DrawEntry;
             lst.DoubleClick += OnSaveFiles;
             lst.KeyDown += (s, e) => { if (e.KeyCode == Keys.Delete) OnScratch(s, e); else if (e.KeyCode == Keys.F5) OnDirectory(s, e); };
@@ -1509,6 +1520,9 @@ namespace XumerTool
             else txtCmd.Select(c.Cmd.Length, 0);
         }
 
+        /// <summary>Distanza della colonna delle icone dal bordo (30 caratteri), misurata una volta per carattere.</summary>
+        int entryIconCol = -1;
+
         void DrawEntry(object sender, DrawItemEventArgs e)
         {
             Color back = Theme.C64Back, fore = Theme.C64Text;
@@ -1520,8 +1534,8 @@ namespace XumerTool
 
             // icona pixel del tipo di file, in una colonna dopo il tipo (la directory resta allineata come sul C64)
             int px = Math.Max(1, (int)Math.Round(lst.ItemHeight * 0.62 / 8.0));
-            float col = ScreenFonts.Measure(e.Graphics, new string('0', 30), lst.Font).Width;
-            int x = e.Bounds.X + (int)Math.Ceiling(col);
+            if (entryIconCol < 0) entryIconCol = (int)Math.Ceiling(ScreenFonts.Measure(e.Graphics, new string('0', 30), lst.Font).Width);
+            int x = e.Bounds.X + entryIconCol;
             int y = e.Bounds.Y + (e.Bounds.Height - 8 * px) / 2;
             bool selected = (e.State & DrawItemState.Selected) != 0;
             FileTypeIcons.Draw(e.Graphics, en.Type, x, y, px, selected ? fore : Color.Empty);
@@ -2324,16 +2338,25 @@ namespace XumerTool
             Run(title, delegate
             {
                 byte[] img;
-                try { img = drive.ReadImageFast(kind); }
-                catch (OperationCanceledException) { throw; }
-                catch (Exception ex)
+                if (!drive.CanFastCopy(kind))
                 {
-                    Log(Lang.T("ERRORE: copia veloce non riuscita: ") + ex.Message);
-                    Log(Lang.T("Rifaccio la copia con il metodo normale…"));
-                    Thread.Sleep(2500);                   // il drive si riprende dall'eventuale reset del bus
-                    try { drive.ReadStatus(); } catch { }
-                    Invoke((Action)delegate { if (diskMap != null && mapShown) diskMap.Start(kind, Lang.T("Crea immagine") + " " + kind); });
+                    // drive o formato non adatti (es. D71 senza 1571): copia normale subito, senza attese
+                    Log(Lang.F("Copia veloce non disponibile per {0} sul drive {1}: uso la copia normale.", kind, drive.Model));
                     img = drive.ReadImage(kind);
+                }
+                else
+                {
+                    try { img = drive.ReadImageFast(kind); }
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex)
+                    {
+                        Log(Lang.T("ERRORE: copia veloce non riuscita: ") + ex.Message);
+                        Log(Lang.T("Rifaccio la copia con il metodo normale…"));
+                        Thread.Sleep(2500);                   // il drive si riprende dal reset del bus fatto dalla copia veloce
+                        try { drive.ReadStatus(); } catch { }
+                        Invoke((Action)delegate { if (diskMap != null && mapShown) diskMap.Start(kind, Lang.T("Crea immagine") + " " + kind); });
+                        img = drive.ReadImage(kind);
+                    }
                 }
                 File.WriteAllBytes(path, img);
                 Log(Lang.T("Immagine salvata: ") + path);
@@ -2491,6 +2514,14 @@ namespace XumerTool
             SelectTab(tab);
             progress.Maximum = 683; progress.Value = 410;
             lblProgress.Text = "410 / 683";
+        }
+
+        /// <summary>Per le anteprime: niente drive collegato (pulsanti del drive disattivati, LED spenti).</summary>
+        public void DemoOffline()
+        {
+            demo = false;
+            SetState("OFFLINE", Lang.T("adattatore non collegato"));
+            UpdateButtons();
         }
 
         /// <summary>Per le anteprime: la legenda dei messaggi e un errore spiegato nel registro.</summary>

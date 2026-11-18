@@ -33,6 +33,16 @@ namespace XumerTool
             if (Model == null) Model = "?";
         }
 
+        /// <summary>
+        /// Si può fare la copia veloce di questo tipo d'immagine con il drive collegato?
+        /// Identifica il modello se serve (con un reset del bus, come ReadImageFast).
+        /// </summary>
+        public bool CanFastCopy(ImageKind kind)
+        {
+            EnsureModel();
+            return FastSupported(kind);
+        }
+
         public bool FastSupported(ImageKind kind)
         {
             if (kind == ImageKind.D81) return false;

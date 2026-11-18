@@ -1740,3 +1740,11 @@ en: The site did not return the upload keys: copy them from the keys page.
 it: Chiavi non valide: ricopiale dalla pagina delle chiavi di archive.org.
 en: Invalid keys: copy them again from the archive.org keys page.
 
+
+# 18/11/2026 – correzioni dalla seconda revisione
+it: Traccia {0} settore {1}: arrivati {2} byte su 256, riprovo
+en: Track {0} sector {1}: {2} of 256 bytes arrived, retrying
+
+it: Copia veloce non disponibile per {0} sul drive {1}: uso la copia normale.
+en: Fast copy is not available for {0} on drive {1}: using the normal copy.
+

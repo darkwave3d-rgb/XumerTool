@@ -61,10 +61,13 @@ namespace XumerTool
             return values.TryGetValue(key, out v) ? v : def;
         }
 
-        public static void Set(string key, string value)
+        public static void Set(string key, string value) { SetMany(key, value); }
+
+        /// <summary>Salva più valori insieme (coppie chiave, valore) con una sola scrittura del file.</summary>
+        public static void SetMany(params string[] keyValues)
         {
             Load();
-            values[key] = value ?? "";
+            for (int i = 0; i + 1 < keyValues.Length; i += 2) values[keyValues[i]] = keyValues[i + 1] ?? "";
             try
             {
                 Directory.CreateDirectory(Dir);

@@ -19,6 +19,9 @@ namespace XumerTool
         public const string SignupPage = "https://archive.org/account/signup";
         const string LoginUrl = "https://archive.org/services/xauthn/?op=login";
         const string S3Url = "https://s3.us.archive.org/";
+        // Risposte verificate il 18/11/2026 con dati inventati:
+        //   xauthn, account inesistente  → 401 {"success":false,"values":{"reason":"account_not_found"},"version":1}
+        //   check_auth=1, chiavi finte   → 200 {"error": "...", "accesskey": "...", "authorized": false}
 
         public static string Access, Secret, ScreenName;
         public static bool Connected { get { return !string.IsNullOrEmpty(Access) && !string.IsNullOrEmpty(Secret); } }
@@ -56,15 +59,14 @@ namespace XumerTool
         public static void Save(string access, string secret, string screenName)
         {
             Access = access; Secret = secret; ScreenName = screenName ?? "";
-            Settings.Set("ia_access", Protect(access));
-            Settings.Set("ia_secret", Protect(secret));
-            Settings.Set("ia_name", ScreenName);
+            // tutti insieme: mai chiavi salvate a metà
+            Settings.SetMany("ia_access", Protect(access), "ia_secret", Protect(secret), "ia_name", ScreenName);
         }
 
         public static void Disconnect()
         {
             Access = Secret = null; ScreenName = "";
-            Settings.Set("ia_access", ""); Settings.Set("ia_secret", ""); Settings.Set("ia_name", "");
+            Settings.SetMany("ia_access", "", "ia_secret", "", "ia_name", "");
         }
 
         // ---------- collegamento ----------
@@ -78,6 +80,9 @@ namespace XumerTool
             r.Method = method;
             r.UserAgent = "XUMER TOOL/" + AboutDialog.AppVersion;
             r.Timeout = 20000;
+            // .NET aggiunge "Expect: 100-continue" alle richieste con dati: archive.org le rifiuta con
+            // "400 Bad Request" (pagina HTML invece della risposta JSON). Verificato il 18/11/2026.
+            r.ServicePoint.Expect100Continue = false;
             return r;
         }
 
@@ -131,29 +136,26 @@ namespace XumerTool
         }
 
         /// <summary>
-        /// Controlla delle chiavi copiate a mano chiedendo al servizio S3 l'elenco degli elementi dell'account.
+        /// Controlla delle chiavi copiate a mano con il servizio apposito di archive.org (check_auth):
+        /// valgono solo se la risposta dice "authorized": true. Non si usa l'elenco degli elementi,
+        /// che risponde "OK" (con un proprietario d'esempio) anche senza chiavi.
         /// Restituisce il nome dell'account se il servizio lo indica (altrimenti stringa vuota).
         /// </summary>
         public static string CheckKeys(string access, string secret)
         {
-            HttpWebRequest r = Request(S3Url, "GET");
+            HttpWebRequest r = Request(S3Url + "?check_auth=1", "GET");
             r.Headers["authorization"] = "LOW " + access + ":" + secret;
-            try
-            {
-                using (WebResponse resp = r.GetResponse())
-                {
-                    string xml = ReadBody(resp);
-                    Match m = Regex.Match(xml, "<DisplayName>([^<]*)</DisplayName>");
-                    return m.Success ? WebUtility.HtmlDecode(m.Groups[1].Value) : "";
-                }
-            }
+            string json;
+            try { using (WebResponse resp = r.GetResponse()) json = ReadBody(resp); }
             catch (WebException ex)
             {
-                HttpWebResponse h = ex.Response as HttpWebResponse;
-                if (h != null && (h.StatusCode == HttpStatusCode.Forbidden || h.StatusCode == HttpStatusCode.Unauthorized))
-                    throw new Exception(Lang.T("Chiavi non valide: ricopiale dalla pagina delle chiavi di archive.org."));
-                throw new Exception(Lang.T("archive.org non risponde: controlla la connessione a internet.") + " (" + ex.Message + ")");
+                if (ex.Response == null) throw new Exception(Lang.T("archive.org non risponde: controlla la connessione a internet.") + " (" + ex.Message + ")");
+                using (WebResponse resp = ex.Response) json = ReadBody(resp);
             }
+            if (!Regex.IsMatch(json, "\"authorized\"\\s*:\\s*true"))
+                throw new Exception(Lang.T("Chiavi non valide: ricopiale dalla pagina delle chiavi di archive.org."));
+            string name = JsonString(json, "screenname") ?? JsonString(json, "itemname") ?? "";
+            return name.TrimStart('@');
         }
     }
 }

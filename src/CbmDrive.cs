@@ -425,22 +425,22 @@ namespace XumerTool
                         string st = ReadStatus(false);
                         int code = StatusCode(st);
                         if (code == 74) throw new DriveException(Lang.T("Drive non pronto (manca il disco?): ") + st);
-                        if (code >= 20)
+                        byte[] b = null;
+                        if (code < 20)
+                        {
+                            b = ReadSectorBuffer(t, s, ref st);   // null = rileggendo, il drive ha segnalato un errore
+                            if (b == null) code = StatusCode(st);
+                        }
+                        if (b == null)
                         {
                             anyError = true;
-                            err[i] = (byte)(code >= 20 && code <= 29 ? code - 18 : 15);
+                            err[i] = ErrorByte(code);
                             Log(string.Format(Lang.T("Errore traccia {0} settore {1}: {2}"), t, s, st));
                             Block(t, s, BlockState.Error);
                         }
                         else
                         {
                             err[i] = 1;
-                            if (!x.Talk(Dev, 2)) NotPresent();
-                            byte[] b = x.RawRead(256);
-                            x.Untalk();
-                            // un settore incompleto non va mai accettato come buono: l'immagine sarebbe rovinata in silenzio
-                            if (b.Length != 256)
-                                throw new IOException(string.Format(Lang.T("Settore incompleto (traccia {0} settore {1}: {2} byte su 256)"), t, s, b.Length));
                             Array.Copy(b, 0, img, i * 256, 256);
                             Block(t, s, BlockState.Done);
                         }
@@ -453,6 +453,33 @@ namespace XumerTool
             if (!anyError) return img;
             Log(Lang.T("Il disco contiene errori: salvo la tabella errori nell'immagine."));
             return Petscii.Concat(img, err);
+        }
+
+        /// <summary>Codice della tabella errori delle immagini D64/D71 (1 = buono, 2…11 = errori 20…29, 15 = altro).</summary>
+        static byte ErrorByte(int code) { return (byte)(code >= 20 && code <= 29 ? code - 18 : 15); }
+
+        /// <summary>
+        /// Legge i 256 byte del buffer 2 dopo un U1 riuscito. Se arrivano incompleti (disturbo su USB/IEC)
+        /// fa rileggere il settore al drive e riprova, fino a 3 tentativi: un settore incompleto non va mai
+        /// accettato come buono, ma nemmeno deve far perdere tutta la copia. Restituisce null se, rileggendo,
+        /// il drive segnala un errore vero (lo stato finisce in <paramref name="status"/>).
+        /// </summary>
+        byte[] ReadSectorBuffer(int t, int s, ref string status)
+        {
+            for (int attempt = 1; ; attempt++)
+            {
+                if (!x.Talk(Dev, 2)) NotPresent();
+                byte[] b = x.RawRead(256);
+                x.Untalk();
+                if (b.Length == 256) return b;
+                if (attempt >= 3)
+                    throw new IOException(string.Format(Lang.T("Settore incompleto (traccia {0} settore {1}: {2} byte su 256)"), t, s, b.Length));
+                Log(string.Format(Lang.T("Traccia {0} settore {1}: arrivati {2} byte su 256, riprovo"), t, s, b.Length));
+                CheckCancel();
+                SendCommand(Petscii.FromText("U1 2 0 " + t + " " + s), false);   // U1 rilegge il settore e riporta il puntatore del buffer a 0
+                status = ReadStatus(false);
+                if (StatusCode(status) >= 20) return null;
+            }
         }
 
         public static void ImageHeader(ImageKind kind, byte[] img, out string name, out string id)

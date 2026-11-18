@@ -16,7 +16,17 @@ namespace XumerTool
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             if (args.Length >= 3 && args[0] == "compare") return Compare(args[1], args[2]);
-            int dev = args.Length > 0 ? int.Parse(args[0]) : 8;
+            int dev = 8;
+            if (args.Length > 0 && (!int.TryParse(args[0], out dev) || dev < 8 || dev > 30))
+            {
+                Console.WriteLine("Uso:");
+                Console.WriteLine("  xumtest.exe 8 [reset] [dir]          stato del drive 8 (reset del bus, directory)");
+                Console.WriteLine("  xumtest.exe 8 slow-read disco.d64     copia lenta (U1), immagine di riferimento");
+                Console.WriteLine("  xumtest.exe 8 fast-read disco.d64     copia veloce S2 (solo lettura)");
+                Console.WriteLine("  xumtest.exe compare a.d64 b.d64       confronta due immagini (senza drive)");
+                Console.WriteLine("Il primo valore e' il numero del drive (8-11 di solito). .d71 = 1571 doppia faccia.");
+                return 2;
+            }
             try
             {
                 using (Xum1541 x = Xum1541.Open())

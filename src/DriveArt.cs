@@ -169,9 +169,20 @@ namespace XumerTool
             timer.Tick += delegate { blink = !blink; if (dirty || !finished) { dirty = false; Invalidate(); } };
         }
 
+        // caratteri creati una volta sola (la mappa si ridisegna ogni 120 ms durante le copie);
+        // al cambio di tema o di carattere l'interfaccia viene ricostruita con una mappa nuova
+        Font bigFont, smallFont;
+        Font BigFont { get { if (bigFont == null) bigFont = ScreenFonts.Screen(); return bigFont; } }
+        Font SmallFont { get { if (smallFont == null) smallFont = new Font("Consolas", 7.5f, GraphicsUnit.Point); return smallFont; } }
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing) timer.Dispose();
+            if (disposing)
+            {
+                timer.Dispose();
+                if (bigFont != null) bigFont.Dispose();
+                if (smallFont != null) smallFont.Dispose();
+            }
             base.Dispose(disposing);
         }
 
@@ -205,7 +216,8 @@ namespace XumerTool
         {
             finished = true;
             curTrack = 0;
-            dirty = true;
+            dirty = false;
+            timer.Stop();   // niente più lampeggio né aggiornamenti: il timer ripartirà con la prossima copia
             Invalidate();
         }
 
@@ -235,8 +247,7 @@ namespace XumerTool
             foreach (byte[] tr in state)
                 foreach (byte b in tr) { total++; if (b == Done) ok++; else if (b == Error) bad++; }
 
-            using (Font big = ScreenFonts.Screen())
-            using (Font small = new Font("Consolas", 7.5f, GraphicsUnit.Point))
+            Font big = BigFont, small = SmallFont;
             {
                 int pad = 0;
                 int lineH = big.Height + Theme.S(4);

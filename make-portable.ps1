@@ -2,6 +2,8 @@
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 $v = ([regex]::Match((Get-Content 'src\About.cs' -Raw), 'AppVersion\s*=\s*"([^"]+)"')).Groups[1].Value
+# senza versione lo zip avrebbe un nome sbagliato (XumerTool--portable.zip): meglio fermarsi
+if ([string]::IsNullOrEmpty($v)) { throw "Versione non trovata in src\About.cs (costante AppVersion): zip non creato." }
 $tmp = 'bin\portable'
 $t = Join-Path $tmp 'XUMER TOOL'
 if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
