@@ -10,6 +10,7 @@
 - **Menu del tasto destro** sui file: salva sul PC, avvia in VICE, rinomina, cancella, salva la directory come .txt.
 - **Preferenze riordinate**: sezioni colorate come la barra a nastro, una per riga, senza scorrere.
 - Lettura delle immagini verificata con c1541 di VICE (directory, blocchi liberi e file identici); un'immagine rovinata dà un errore chiaro. `xumtest image` mostra la directory di un'immagine ed estrae i file.
+- Corretto: nello schermo blu l'ultima riga della directory non resta più tagliata a metà sopra "BLOCKS FREE".
 
 ## 1.2.1b (beta) – 18/11/2026
 

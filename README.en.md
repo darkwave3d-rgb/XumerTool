@@ -19,7 +19,7 @@
 ## Features
 
 - **Disk**: directory on the blue C64 screen, validate, format.
-- **Files**: save files from the disk to the PC and write PC files to the disk (PRG, SEQ, P00), rename, delete. You can also drag files onto the blue screen.
+- **Files**: save files from the disk to the PC and write PC files to the disk (PRG, SEQ, P00), rename, delete, also from the right-click menu. You can also drag files onto the blue screen.
 - **Disk images**: opens **D64**, **D71** and **D81** images from the PC even without a drive (by double-click in File Explorer or by dragging them onto the blue screen); creates and writes images on disk (with a C64-style directory .txt next to them), with a disk map that fills in sector by sector. Plus the experimental **fast copy** (OpenCBM's S2 protocol): a whole disk in about one minute.
 - **DOS commands**: command line with a list of ready-made commands, drive status reading and a legend of the error messages with an explanation and what to do.
 - **VICE**: run a program, an image or the whole disk in the emulator.
@@ -35,6 +35,10 @@
 
 <p align="center">
   <img src="docs/en-disk-map.png" width="820" alt="Disk map while creating a D71 image: both sides, with sectors read, sectors still to read and a few errors">
+</p>
+
+<p align="center">
+  <img src="docs/en-pc-image.png" width="820" alt="A D64 image opened from the PC with no drive connected, with the right-click menu on a file">
 </p>
 
 ## Requirements
@@ -73,7 +77,7 @@ Ten themes, chosen in Preferences from a drop-down list with a preview of the wi
 Light, Commodore, Rosé Pine, Dark, Tokyo Night, Catppuccin, Everforest, Gruvbox, Nord and Lunar Tear.
 
 <p align="center">
-  <img src="docs/en-preferences.png" width="520" alt="Preferences window with the theme choice">
+  <img src="docs/en-preferences.png" width="520" alt="Preferences window with coloured sections: startup and language, disk images, screen saver, font and theme">
   <img src="docs/en-themes.png" width="260" alt="Theme drop-down list">
 </p>
 

@@ -10,6 +10,7 @@
 - **Right-click menu** on files: save to PC, run in VICE, rename, delete, save the directory as .txt.
 - **Tidier Preferences**: coloured sections like the ribbon, one per row, no scrolling.
 - Image reading checked against VICE's c1541 (identical directory, free blocks and files); a damaged image gives a clear error. `xumtest image` shows an image's directory and extracts its files.
+- Fixed: on the blue screen the last directory line is no longer cut in half above "BLOCKS FREE".
 
 ## 1.2.1b (beta) – 2026-11-18
 

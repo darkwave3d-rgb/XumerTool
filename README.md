@@ -19,7 +19,7 @@
 ## Cosa fa
 
 - **Disco**: directory nello schermo blu del C64, validazione, formattazione.
-- **File**: salva i file del disco sul PC e scrive i file del PC sul disco (PRG, SEQ, P00), rinomina, cancella. Si possono anche trascinare i file sullo schermo blu.
+- **File**: salva i file del disco sul PC e scrive i file del PC sul disco (PRG, SEQ, P00), rinomina, cancella, anche dal menu del tasto destro. Si possono anche trascinare i file sullo schermo blu.
 - **Immagini disco**: apre le immagini **D64**, **D71** e **D81** dal PC anche senza drive (con doppio clic da Esplora risorse o trascinandole sullo schermo blu); crea e scrive immagini sul disco (con un .txt della directory accanto, in stile C64), con la mappa del disco che si colora settore per settore. In più la **copia veloce** sperimentale (protocollo S2 di OpenCBM): un disco in circa un minuto.
 - **Comandi DOS**: riga di comando con un elenco di comandi pronti, lettura dello stato del drive e legenda dei messaggi di errore con la spiegazione e cosa fare.
 - **VICE**: avvia nell'emulatore un programma, un'immagine o tutto il disco del drive.
@@ -35,6 +35,10 @@
 
 <p align="center">
   <img src="docs/mappa-disco.png" width="820" alt="Mappa del disco durante la creazione di un'immagine D71: le due facce, con i settori letti, quelli da leggere e alcuni errori">
+</p>
+
+<p align="center">
+  <img src="docs/immagine-pc.png" width="820" alt="Un'immagine D64 aperta dal PC senza drive collegato, con il menu del tasto destro su un file">
 </p>
 
 ## Cosa serve
@@ -73,7 +77,7 @@ Dieci temi, scelti nelle Preferenze da una tendina con l'anteprima della finestr
 Chiaro, Commodore, Rosé Pine, Scuro, Tokyo Night, Catppuccin, Everforest, Gruvbox, Nord e Lunar Tear.
 
 <p align="center">
-  <img src="docs/preferenze.png" width="520" alt="Finestra Preferenze con la scelta del tema">
+  <img src="docs/preferenze.png" width="520" alt="Finestra Preferenze a sezioni colorate: avvio e lingua, immagini disco, salvaschermo, carattere e tema">
   <img src="docs/temi.png" width="260" alt="Tendina dei temi">
 </p>
 

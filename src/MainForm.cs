@@ -84,8 +84,11 @@ namespace XumerTool
                 f.StartPosition = FormStartPosition.Manual;
                 f.Location = new Point(-20000, -20000);
                 f.Show();
-                foreach (string a in args)   // w=NNN: larghezza della finestra (per provare l'adattamento)
+                foreach (string a in args)   // w=NNN / h=NNN: larghezza e altezza della finestra (per provare l'adattamento)
+                {
                     if (a.StartsWith("w=")) f.Width = Math.Max(f.MinimumSize.Width, int.Parse(a.Substring(2)));
+                    if (a.StartsWith("h=")) f.Height = Math.Max(f.MinimumSize.Height, int.Parse(a.Substring(2)));
+                }
                 f.Demo(args.Length >= 4 ? int.Parse(args[3]) : 1);
                 if (args.Length >= 5 && args[4] == "saver") { Application.DoEvents(); f.DemoPanelSaver(4.0f); }
                 // iaon: scheda Internet Archive "collegata" con un nome di esempio (nulla viene salvato)
@@ -931,7 +934,8 @@ namespace XumerTool
             {
                 Dock = DockStyle.Fill, BorderStyle = BorderStyle.None, DrawMode = DrawMode.OwnerDrawFixed,
                 BackColor = Theme.C64Back, ForeColor = Theme.C64Text, Font = ScreenFonts.Screen(),
-                SelectionMode = SelectionMode.MultiExtended, IntegralHeight = false, AllowDrop = true
+                // IntegralHeight: solo righe intere, così l'ultima non resta tagliata a metà sopra "BLOCKS FREE"
+                SelectionMode = SelectionMode.MultiExtended, IntegralHeight = true, AllowDrop = true
             };
             lst.ItemHeight = lst.Font.Height + Theme.S(ScreenFonts.Current.Spacing);
             entryIconCol = -1;   // colonna delle icone dei file: si rimisura con il carattere nuovo
