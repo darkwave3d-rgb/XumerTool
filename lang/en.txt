@@ -1,0 +1,1271 @@
+# XUMER TOOL - English translation (lang\en.txt)
+# Pairs of lines: 'it:' Italian text used in the code, 'en:' translation. \n = new line.
+# Missing entries are shown in Italian. Edit with any text editor (UTF-8).
+
+it: Adattatore e protocollo di comunicazione
+en: Adapter and communication protocol
+
+it: Michael Klein, Spiro Trikaliotis, Wolfgang Moser e collaboratori
+en: Michael Klein, Spiro Trikaliotis, Wolfgang Moser and contributors
+
+it: Progetto di riferimento per i drive Commodore su PC: il protocollo USB dell'adattatore xum1541 è implementato secondo le sue specifiche.
+en: Reference project for Commodore drives on the PC: the USB protocol of the xum1541 adapter is implemented according to its specifications.
+
+it: GPL-2.0 o successiva
+en: GPL-2.0 or later
+
+it: Firmware xum1541
+en: xum1541 firmware
+
+it: Nate Lawson, sulla base di xu1541 di Till Harbaum
+en: Nate Lawson, based on xu1541 by Till Harbaum
+
+it: Firmware che trasforma il microcontrollore in un adattatore USB per il bus seriale IEC.
+en: Firmware that turns the microcontroller into a USB adapter for the IEC serial bus.
+
+it: Libreria USB per microcontrollori AVR, inclusa nel firmware xum1541.
+en: USB library for AVR microcontrollers, included in the xum1541 firmware.
+
+it: Permissiva (stile MIT)
+en: Permissive (MIT style)
+
+it: Routine 6502 per la copia veloce
+en: 6502 routines for fast copy
+
+it: Michael Klein (protocollo S2), Joe Forster/STA (turbo read/write)
+en: Michael Klein (S2 protocol), Joe Forster/STA (turbo read/write)
+
+it: Codice eseguito all'interno del drive, tratto da OpenCBM/d64copy e incluso nell'applicazione.
+en: Code that runs inside the drive, taken from OpenCBM/d64copy and included in the application.
+
+it: Hardware e progetti di riferimento
+en: Hardware and reference projects
+
+it: Progetto della scheda con Arduino Pro Micro e connettore DIN per il bus IEC.
+en: Board design with an Arduino Pro Micro and a DIN connector for the IEC bus.
+
+it: Non indicata nel repository
+en: Not stated in the repository
+
+it: Programma web per l'adattatore xum1541, da cui è nata l'idea di questa applicazione, e firmware RFIEC.
+en: Web program for the xum1541 adapter, which inspired this application, and the RFIEC firmware.
+
+it: Libreria per Arduino alla base del firmware RFIEC.
+en: Arduino library behind the RFIEC firmware.
+
+it: Strumenti esterni (non inclusi, scaricati dalle fonti ufficiali)
+en: External tools (not included, downloaded from the official sources)
+
+it: Emulatore Commodore utilizzato per avviare programmi e immagini disco.
+en: Commodore emulator used to run programs and disk images.
+
+it: Strumento per l'installazione del driver WinUSB dell'adattatore.
+en: Tool that installs the WinUSB driver for the adapter.
+
+it: Progetto AVRDUDE
+en: AVRDUDE project
+
+it: Programmatore di riferimento per microcontrollori AVR; l'applicazione ne implementa lo stesso protocollo AVR109.
+en: Reference programmer for AVR microcontrollers; the application implements its same AVR109 protocol.
+
+it: Caratteri e colori
+en: Fonts and colors
+
+it: Carattere ispirato al Commodore 64, predefinito nello schermo della directory.
+en: Font inspired by the Commodore 64, the default for the directory screen.
+
+it: Altri caratteri della directory
+en: Other directory fonts
+
+it: Caratteri selezionabili nelle Preferenze, inclusi nell'applicazione (testi delle licenze nella cartella Licenze).
+en: Fonts selectable in Preferences, included in the application (license texts in the Licenze folder).
+
+it: Tavolozza di colori del tema omonimo.
+en: Color palette of the theme with the same name.
+
+it: Tavolozze di colori dei temi omonimi, scelte tra le più usate anche in Omarchy.
+en: Color palettes of the themes with the same names, among the most used ones in Omarchy too.
+
+it: Tema per Blender che ha ispirato i colori del tema "Lunar Tear" (nessun file del tema è incluso).
+en: Blender theme that inspired the colors of the "Lunar Tear" theme (no theme files are included).
+
+it: GPL-3.0 (solo ispirazione)
+en: GPL-3.0 (inspiration only)
+
+it: Tavolozza C64 utilizzata per i colori dello schermo della directory.
+en: C64 palette used for the colors of the directory screen.
+
+it: Tavolozza pubblica
+en: Public palette
+
+it: Informazioni su XUMER TOOL
+en: About XUMER TOOL
+
+it: Versione 
+en: Version 
+
+it:  · interfaccia integrata per drive Commodore e adattatore xum1541
+en:  · integrated interface for Commodore drives and the xum1541 adapter
+
+it: Il progetto
+en: The project
+
+it: Commodore, C64, VIC-20, Amiga e i nomi dei prodotti citati sono marchi dei rispettivi proprietari. 
+en: Commodore, C64, VIC-20, Amiga and the other product names mentioned are trademarks of their respective owners. 
+
+it: Il testo della licenza MIT è nel file LICENSE.txt; i testi delle licenze di terze parti sono nella cartella "Licenze" della cartella di installazione.
+en: The MIT license text is in the LICENSE.txt file; the third-party license texts are in the "Licenze" folder of the installation folder.
+
+it: Chiudi
+en: Close
+
+it: Giochi
+en: Games
+
+it: XUMER TOOL è un'interfaccia grafica integrata. Riunisce in un'unica applicazione gli strumenti, i protocolli 
+en: XUMER TOOL is an integrated graphical interface. It brings together in a single application the tools, protocols 
+
+it: e le risorse sviluppati dai progetti elencati di seguito, per renderli utilizzabili insieme in modo semplice e coerente.\n\n
+en: and resources developed by the projects listed below, so that they can be used together in a simple and consistent way.\n\n
+
+it: L'applicazione non sostituisce tali progetti né ne rivendica la paternità: il merito del lavoro originale appartiene 
+en: The application does not replace those projects nor claim authorship of them: credit for the original work goes 
+
+it: ai rispettivi autori, nel rispetto delle relative licenze.\n\n
+en: to their respective authors, in accordance with their licenses.\n\n
+
+it: Ideazione, progettazione dell'interfaccia e collaudo sull'hardware reale (adattatore xum1541 su Arduino Pro Micro e 
+en: Concept, interface design and testing on real hardware (xum1541 adapter on an Arduino Pro Micro and a 
+
+it: Commodore 1571): darkwave3D. Sviluppo del codice con il supporto di Claude (Anthropic).\n\n
+en: Commodore 1571): darkwave3D. Code developed with the support of Claude (Anthropic).\n\n
+
+it: XUMER TOOL è distribuito con licenza MIT. I componenti di terze parti inclusi (routine 6502 di OpenCBM e caratteri) 
+en: XUMER TOOL is released under the MIT license. The included third-party components (OpenCBM 6502 routines and fonts) 
+
+it: mantengono le rispettive licenze, riportate qui sotto e nella cartella "Licenze".
+en: keep their own licenses, listed below and in the "Licenze" folder.
+
+it: Non riesco ad aprire il link: 
+en: Cannot open the link: 
+
+it: Operazione annullata
+en: Operation cancelled
+
+it: Il drive 
+en: Drive 
+
+it:  non risponde (è acceso? numero giusto? cavo IEC collegato?)
+en:  is not responding (is it on? right number? IEC cable connected?)
+
+it: Invio comando fallito
+en: Sending the command failed
+
+it: > $ (directory)
+en: > $ (directory)
+
+it: Lettura directory
+en: Reading directory
+
+it: Directory: "{0}" {1} - {2} file, {3} blocchi liberi
+en: Directory: "{0}" {1} - {2} files, {3} blocks free
+
+it: I file REL non sono supportati
+en: REL files are not supported
+
+it: > apri "{0}" in lettura
+en: > open "{0}" for reading
+
+it: Apertura file
+en: Opening file
+
+it: Letti 
+en: Read 
+
+it:  byte
+en:  bytes
+
+it: > scrivi "
+en: > write "
+
+it:  byte)
+en:  bytes)
+
+it: Apertura file in scrittura
+en: Opening file for writing
+
+it: Scrittura interrotta dopo 
+en: Writing stopped after 
+
+it: Scrittura file
+en: Writing file
+
+it: Rinomina
+en: Rename
+
+it: Formattazione in corso, attendi...
+en: Formatting, please wait...
+
+it: Formattazione
+en: Formatting
+
+it: Lettura disco -> 
+en: Reading disk -> 
+
+it:  blocchi)...
+en:  blocks)...
+
+it: Apertura buffer
+en: Opening buffer
+
+it: Drive non pronto (manca il disco?): 
+en: Drive not ready (no disk?): 
+
+it: Errore traccia {0} settore {1}: {2}
+en: Error on track {0} sector {1}: {2}
+
+it: Il disco contiene errori: salvo la tabella errori nell'immagine.
+en: The disk contains errors: saving the error table in the image.
+
+it: Immagine troppo corta
+en: Image too short
+
+it: Scrittura 
+en: Writing 
+
+it:  su disco (
+en:  to disk (
+
+it: Invio dati fallito (traccia {0} settore {1})
+en: Sending data failed (track {0} sector {1})
+
+it: Errore scrittura traccia {0} settore {1}: {2}
+en: Write error on track {0} sector {1}: {2}
+
+it: Immagine scritta.
+en: Image written.
+
+it: Identificazione del drive (reset bus IEC)…
+en: Identifying the drive (IEC bus reset)…
+
+it: Programma drive mancante: 
+en: Drive program missing: 
+
+it: : indirizzo di partenza inatteso
+en: : unexpected start address
+
+it: Il drive non ha avviato il programma veloce
+en: The drive did not start the fast program
+
+it: Uscita dal programma veloce non riuscita: reset del bus.
+en: Could not leave the fast program: resetting the bus.
+
+it: Copia veloce non disponibile per 
+en: Fast copy not available for 
+
+it:  sul drive 
+en:  on drive 
+
+it: Inizializzazione disco
+en: Initializing disk
+
+it: Copia veloce (S2): disco -> 
+en: Fast copy (S2): disk -> 
+
+it:  blocchi)…
+en:  blocks)…
+
+it: Risposta incompleta dal drive (
+en: Incomplete reply from the drive (
+
+it: Errore traccia {0} settore {1}: codice {2} (errore DOS {3})
+en: Error on track {0} sector {1}: code {2} (DOS error {3})
+
+it: Scrittura veloce non disponibile per 
+en: Fast write not available for 
+
+it: Scrittura veloce (S2): 
+en: Fast write (S2): 
+
+it:  -> disco (
+en:  -> disk (
+
+it: Nessuna risposta dal drive
+en: No reply from the drive
+
+it: il disco è protetto da scrittura
+en: the disk is write-protected
+
+it: Errore scrittura traccia {0} settore {1}: codice {2}
+en: Write error on track {0} sector {1}: code {2}
+
+it: errore di scrittura su traccia {0} settore {1} (codice {2})
+en: write error on track {0} sector {1} (code {2})
+
+it: Scrittura interrotta: 
+en: Writing stopped: 
+
+it: Lettura blocco
+en: Reading block
+
+it: File HEX non valido alla riga 
+en: Invalid HEX file at line 
+
+it: Lunghezza errata alla riga 
+en: Wrong length at line 
+
+it: Checksum errato alla riga 
+en: Wrong checksum at line 
+
+it: Il firmware è troppo grande per il Pro Micro (oltre 
+en: The firmware is too big for the Pro Micro (over 
+
+it:  byte): sovrascriverebbe il bootloader.
+en:  bytes): it would overwrite the bootloader.
+
+it: Il file HEX è incompleto (manca la riga finale).
+en: The HEX file is incomplete (the end line is missing).
+
+it: Il file HEX non contiene dati.
+en: The HEX file contains no data.
+
+it: Il bootloader ha rifiutato il comando: 
+en: The bootloader rejected the command: 
+
+it: Firma del chip: {0:X2} {1:X2} {2:X2}
+en: Chip signature: {0:X2} {1:X2} {2:X2}
+
+it: Il chip non è un ATmega32U4: scrittura annullata.
+en: The chip is not an ATmega32U4: writing cancelled.
+
+it: modalità di programmazione
+en: programming mode
+
+it: scrittura flash
+en: flash write
+
+it: Verifica fallita all'indirizzo {0:X4}: il firmware non è stato scritto correttamente. Riprova.
+en: Verification failed at address {0:X4}: the firmware was not written correctly. Try again.
+
+it: fine programmazione
+en: end of programming
+
+it: xum1541 v08 per Pro Micro (OpenCBM)
+en: xum1541 v08 for Pro Micro (OpenCBM)
+
+it: xum1541 v08 per Pro Micro con 7406 (OpenCBM)
+en: xum1541 v08 for Pro Micro with 7406 (OpenCBM)
+
+it: File .hex dal PC…
+en: .hex file from the PC…
+
+it: Scarico 
+en: Downloading 
+
+it: PREMI SPAZIO (O CLICCA) PER SALTARE
+en: PRESS SPACE (OR CLICK) TO JUMP
+
+it: FLOPPY SMAGNETIZZATO!  PREMI SPAZIO PER RIPROVARE
+en: FLOPPY DEMAGNETIZED!  PRESS SPACE TO TRY AGAIN
+
+it: Assalto PETSCII
+en: PETSCII Assault
+
+it: PUNTI 
+en: SCORE 
+
+it:    ONDATA 
+en:    WAVE 
+
+it:    VITE 
+en:    LIVES 
+
+it: PREMI SPAZIO PER INIZIARE   ← → MUOVI   SPAZIO SPARA
+en: PRESS SPACE TO START   ← → MOVE   SPACE FIRES
+
+it: READY.  PREMI SPAZIO PER RIGIOCARE
+en: READY.  PRESS SPACE TO PLAY AGAIN
+
+it: 1982 - il computer più venduto di sempre
+en: 1982 - the best-selling computer of all time
+
+it: 1980 - il primo computer a superare il milione di pezzi
+en: 1980 - the first computer to sell over a million units
+
+it: 1977 - il primo computer di Commodore
+en: 1977 - Commodore's first computer
+
+it: 1985 - tre modalità: C128, C64 e CP/M
+en: 1985 - three modes: C128, C64 and CP/M
+
+it: 1987 - grafica e suono da sala giochi in casa
+en: 1987 - arcade graphics and sound at home
+
+it: 1984 - con il software integrato in ROM
+en: 1984 - with built-in software in ROM
+
+it: 1984 - il primo computer portatile a colori
+en: 1984 - the first color portable computer
+
+it: il drive da 5,25" del C64: 170 KB per facciata
+en: the C64's 5.25" drive: 170 KB per side
+
+it: il drive doppia faccia del C128: 340 KB
+en: the C128's double-sided drive: 340 KB
+
+it: il drive da 3,5": 800 KB
+en: the 3.5" drive: 800 KB
+
+it: il chip sonoro progettato da Bob Yannes
+en: the sound chip designed by Bob Yannes
+
+it: il chip video progettato da Al Charpentier
+en: the video chip designed by Al Charpentier
+
+it: la CPU progettata da Chuck Peddle e dal suo team alla MOS
+en: the CPU designed by Chuck Peddle and his team at MOS
+
+it: il fondatore di Commodore
+en: the founder of Commodore
+
+it: il padre del 6502 e del PET
+en: the father of the 6502 and the PET
+
+it: il creatore del SID
+en: the creator of the SID
+
+it: il progettista del VIC-II
+en: the designer of the VIC-II
+
+it: il progettista del C128 e del Plus/4
+en: the designer of the C128 and the Plus/4
+
+it: il padre dei chip dell'Amiga
+en: the father of the Amiga chips
+
+it: ingegnere di Commodore, dal C128 all'Amiga
+en: Commodore engineer, from the C128 to the Amiga
+
+it: XUMER TOOL  ·  PREMI UN TASTO PER TORNARE
+en: XUMER TOOL  ·  PRESS A KEY TO GO BACK
+
+it: Annulla
+en: Cancel
+
+it: Collega automaticamente l'adattatore all'avvio
+en: Connect the adapter automatically at startup
+
+it: FIRMWARE DEL PRO MICRO
+en: PRO MICRO FIRMWARE
+
+it: Installa firmware
+en: Install firmware
+
+it: Prima scollega il cavo IEC dal drive. Con lo xum1541 l'adattatore entra da solo nel bootloader; con altri firmware (es. RFIEC) 
+en: First unplug the IEC cable from the drive. With xum1541 the adapter enters the bootloader by itself; with other firmware (e.g. RFIEC) 
+
+it: premi due volte il tasto reset del Pro Micro quando richiesto. Il firmware viene scritto e verificato; il bootloader non viene mai toccato.
+en: press the Pro Micro reset button twice when asked. The firmware is written and verified; the bootloader is never touched.
+
+it: STRUMENTI NECESSARI
+en: REQUIRED TOOLS
+
+it: Scarica tutto
+en: Download all
+
+it: Driver WinUSB (Zadig)
+en: WinUSB driver (Zadig)
+
+it: Scarica Zadig
+en: Download Zadig
+
+it: Sito
+en: Website
+
+it: Firmware xum1541 (.hex)
+en: xum1541 firmware (.hex)
+
+it: Scarica
+en: Download
+
+it: Cartella
+en: Folder
+
+it: Emulatore VICE
+en: VICE emulator
+
+it: Sito di VICE
+en: VICE website
+
+it: Firmware RFIEC (RetroFixer)
+en: RFIEC firmware (RetroFixer)
+
+it: si scarica dalla pagina di RetroFixer (pulsante "Scarica .hex")
+en: download it from the RetroFixer page ("Scarica .hex" button)
+
+it: Pagina RetroFixer
+en: RetroFixer page
+
+it: ✓ installato per l'adattatore 16D0:0504
+en: ✓ installed for adapter 16D0:0504
+
+it: non installato: apri Zadig, scegli "xum1541" e installa WinUSB
+en: not installed: open Zadig, choose "xum1541" and install WinUSB
+
+it: ✓ entrambe le versioni scaricate
+en: ✓ both versions downloaded
+
+it: una versione scaricata
+en: one version downloaded
+
+it: non ancora scaricati
+en: not downloaded yet
+
+it: ✓ trovato
+en: ✓ found
+
+it: non trovato sul PC
+en: not found on this PC
+
+it: ERRORE: non riesco ad aprire 
+en: ERROR: cannot open 
+
+it: Zadig è stato scaricato in:\n
+en: Zadig was downloaded to:\n
+
+it: \n\nAvviarlo ora? Windows chiederà il permesso di amministratore.\n\n
+en: \n\nRun it now? Windows will ask for administrator permission.\n\n
+
+it: In Zadig: Options → List All Devices, scegli "xum1541", seleziona WinUSB e premi Install Driver.
+en: In Zadig: Options → List All Devices, choose "xum1541", select WinUSB and press Install Driver.
+
+it: Download strumenti
+en: Downloading tools
+
+it: Il driver WinUSB è già installato: Zadig non serve.
+en: The WinUSB driver is already installed: Zadig is not needed.
+
+it: Download completati. VICE e RFIEC si scaricano dai loro siti (pulsanti nella scheda Adattatore).
+en: Downloads complete. VICE and RFIEC are downloaded from their websites (buttons in the Adapter tab).
+
+it: Firmware Intel HEX (*.hex)|*.hex
+en: Intel HEX firmware (*.hex)|*.hex
+
+it: Scegli il firmware da scrivere sul Pro Micro
+en: Choose the firmware to write to the Pro Micro
+
+it: nessun file scelto
+en: no file chosen
+
+it: verrà scaricato da github.com/OpenCBM la prima volta
+en: it will be downloaded from github.com/OpenCBM the first time
+
+it: Scrivere il firmware "{0}" sul Pro Micro?\n\nScollega prima il cavo IEC dal drive. L'operazione dura circa 20 secondi.
+en: Write the firmware "{0}" to the Pro Micro?\n\nUnplug the IEC cable from the drive first. It takes about 20 seconds.
+
+it: scrittura del firmware in corso
+en: writing the firmware
+
+it: firmware non scritto: premi "Collega"
+en: firmware not written: press "Connect"
+
+it: Firmware: {0} ({1} byte)
+en: Firmware: {0} ({1} bytes)
+
+it: Riavvio dell'adattatore nel bootloader…
+en: Restarting the adapter into the bootloader…
+
+it: >>> Premi ORA due volte, rapidamente, il tasto reset del Pro Micro (o tocca due volte RST con GND).
+en: >>> Press the Pro Micro reset button twice NOW, quickly (or touch RST to GND twice).
+
+it: Il bootloader non è comparso. Premi due volte il tasto reset del Pro Micro e riprova.
+en: The bootloader did not appear. Press the Pro Micro reset button twice and try again.
+
+it: Il bootloader non è comparso entro 30 secondi. Riprova premendo due volte il tasto reset.
+en: The bootloader did not appear within 30 seconds. Try again by pressing the reset button twice.
+
+it: Bootloader trovato su 
+en: Bootloader found on 
+
+it: : scrittura in corso…
+en: : writing…
+
+it: Firmware scritto e verificato. Il Pro Micro si riavvia.
+en: Firmware written and verified. The Pro Micro is restarting.
+
+it: firmware aggiornato: premi "Collega"
+en: firmware updated: press "Connect"
+
+it: Ricollego l'adattatore…
+en: Reconnecting the adapter…
+
+it: Ricollegamento non riuscito: 
+en: Reconnection failed: 
+
+it:  Premi "Collega".
+en:  Press "Connect".
+
+it: Fai saltare il floppy oltre calamite e torri di blocchi PETSCII. Più corri, più va veloce.
+en: Make the floppy jump over magnets and towers of PETSCII blocks. The longer you run, the faster it goes.
+
+it: Spazio / ↑ salta · ↓ scende · Esc esce
+en: Space / ↑ jump · ↓ drop · Esc quit
+
+it: Difendi il drive dagli alieni a blocchi. Colpisci il floppy rosso per un bonus.
+en: Defend the drive from the blocky aliens. Hit the red floppy for a bonus.
+
+it: ← → muovi · Spazio spara · Esc esce
+en: ← → move · Space fire · Esc quit
+
+it: I giochi si aprono in una finestra a parte: puoi giocare mentre l'app crea un'immagine disco.
+en: The games open in a separate window: you can play while the app creates a disk image.
+
+it: Gioca
+en: Play
+
+it: RECORD 
+en: BEST 
+
+it: Inizializza il disco (rilegge la BAM)
+en: Initialize the disk (reread the BAM)
+
+it: Valida: ricostruisce la BAM e libera i blocchi persi
+en: Validate: rebuild the BAM and free lost blocks
+
+it: Cancella un file (ammessi * e ?)
+en: Delete a file (* and ? allowed)
+
+it: Rinomina un file
+en: Rename a file
+
+it: Copia un file sullo stesso disco
+en: Copy a file on the same disk
+
+it: Unisce due file in uno nuovo
+en: Join two files into a new one
+
+it: Formattazione completa con nome e ID
+en: Full format with name and ID
+
+it: Formattazione veloce: svuota la directory
+en: Quick format: empty the directory
+
+it: Reset del drive
+en: Drive reset
+
+it: 1571: modalità doppia faccia
+en: 1571: double-sided mode
+
+it: 1571: modalità 1541 (una faccia)
+en: 1571: 1541 mode (single-sided)
+
+it: 1571: usa la faccia 0
+en: 1571: use side 0
+
+it: 1571: usa la faccia 1
+en: 1571: use side 1
+
+it: adattatore non collegato
+en: adapter not connected
+
+it: Pronto. Collega l'adattatore, accendi il drive e premi "Collega".
+en: Ready. Connect the adapter, turn on the drive and press "Connect".
+
+it: Nota: chiudi la pagina web del programma se è collegata all'adattatore.
+en: Note: close the program's web page if it is connected to the adapter.
+
+it: Drive Commodore 1541 · 1571 · 1581 via USB
+en: Commodore 1541 · 1571 · 1581 drives over USB
+
+it: Drive n°
+en: Drive
+
+it: premi "Leggi stato" per verificare il drive
+en: press "Read status" to check the drive
+
+it: Collega
+en: Connect
+
+it: Preferenze
+en: Preferences
+
+it: Disco
+en: Disk
+
+it: Valida
+en: Validate
+
+it: Formatta…
+en: Format…
+
+it: Formatta
+en: Format
+
+it: File
+en: Files
+
+it: Salva sul PC…
+en: Save to PC…
+
+it: Salva
+en: Save
+
+it: Scrivi su disco…
+en: Write to disk…
+
+it: Scrivi
+en: Write
+
+it: Rinomina…
+en: Rename…
+
+it: Cancella
+en: Delete
+
+it: Immagini disco
+en: Disk images
+
+it: Crea immagine…
+en: Create image…
+
+it: Crea
+en: Create
+
+it: Scrivi immagine…
+en: Write image…
+
+it: Comando DOS
+en: DOS command
+
+it: scrivi un comando o sceglilo dalla scheda "Comandi DOS"
+en: type a command or pick one from the "DOS commands" tab
+
+it: Invia
+en: Send
+
+it: Leggi stato
+en: Read status
+
+it: Adattatore
+en: Adapter
+
+it: Registro
+en: Log
+
+it: Comandi DOS
+en: DOS commands
+
+it: Pulisci registro
+en: Clear log
+
+it: Clicca un comando per scriverlo nella riga "Comando DOS": completa le parti in maiuscolo (NOME, ID…) e premi Invio.
+en: Click a command to put it in the "DOS command" line: fill in the uppercase parts (NAME, ID…) and press Enter.
+
+it: Emulatore
+en: Emulator
+
+it: Sfoglia…
+en: Browse…
+
+it: Cerca
+en: Find
+
+it: Cartella file
+en: Files folder
+
+it: Scegli…
+en: Choose…
+
+it: Apri
+en: Open
+
+it: Macchina
+en: Machine
+
+it: Avvia il file selezionato
+en: Run the selected file
+
+it: Avvia un'immagine dal PC…
+en: Run an image from the PC…
+
+it: Avvia tutto il disco del drive…
+en: Run the whole disk in the drive…
+
+it: I file letti dal disco per VICE vengono salvati nella cartella qui sopra. "Tutto il disco" copia prima l'intero disco (circa 10 minuti).
+en: Files read from the disk for VICE are saved in the folder above. "Whole disk" first copies the entire disk (about 10 minutes).
+
+it: ✓ VICE trovato
+en: ✓ VICE found
+
+it:  (versione 
+en:  (version 
+
+it: VICE non trovato: indica x64sc.exe con "Sfoglia…" (si scarica da vice-emu.sourceforge.io)
+en: VICE not found: point to x64sc.exe with "Browse…" (download it from vice-emu.sourceforge.io)
+
+it: \nCOLLEGA L'ADATTATORE E PREMI DIRECTORY.\n\n
+en: \nCONNECT THE ADAPTER AND PRESS DIRECTORY.\n\n
+
+it: Tema e carattere verranno applicati alla prossima apertura o quando l'operazione sarà finita.
+en: Theme and font will be applied at the next start or when the operation is finished.
+
+it: La nuova lingua si applica riavviando il programma.
+en: The new language is applied when the program restarts.
+
+it: Riavviare ora?
+en: Restart now?
+
+it: Lingua
+en: Language
+
+it: PREMI UN TASTO O MUOVI IL MOUSE PER TORNARE ALLA DIRECTORY
+en: PRESS A KEY OR MOVE THE MOUSE TO RETURN TO THE DIRECTORY
+
+it: Scollega
+en: Disconnect
+
+it: Errore
+en: Error
+
+it: : fatto (
+en: : done (
+
+it: : annullato.
+en: : cancelled.
+
+it: : annullato
+en: : cancelled
+
+it: ERRORE: 
+en: ERROR: 
+
+it: : errore
+en: : error
+
+it: Ripristino comunicazione con l'adattatore…
+en: Restoring communication with the adapter…
+
+it: Collegamento
+en: Connection
+
+it: Collegamento automatico all'avvio (si disattiva nella scheda Adattatore).
+en: Automatic connection at startup (can be turned off in the Adapter tab).
+
+it: Adattatore xum1541 trovato: firmware v{0} (capacità 0x{1:X2})
+en: xum1541 adapter found: firmware v{0} (capabilities 0x{1:X2})
+
+it: Il drive non risponde: provo un reset del bus IEC…
+en: The drive is not responding: trying an IEC bus reset…
+
+it: ADATTATORE COLLEGATO
+en: ADAPTER CONNECTED
+
+it: il drive 
+en: drive 
+
+it:  non risponde: accendilo e premi "Leggi stato"
+en:  is not responding: turn it on and press "Read status"
+
+it: Adattatore scollegato.
+en: Adapter disconnected.
+
+it: C'è un'operazione in corso. Uscire comunque?
+en: An operation is in progress. Quit anyway?
+
+it: Reset bus IEC…
+en: IEC bus reset…
+
+it: Stato
+en: Status
+
+it: Comando
+en: Command
+
+it: Seleziona uno o più file nella directory (premi prima "Directory").
+en: Select one or more files in the directory (press "Directory" first).
+
+it: Tutti i file|*.*
+en: All files|*.*
+
+it: Cartella dove salvare i file
+en: Folder where the files will be saved
+
+it: Lettura file
+en: Reading files
+
+it: Salvato: 
+en: Saved: 
+
+it: File Commodore (*.prg;*.seq;*.p00;*.s00;*.usr)|*.prg;*.seq;*.p00;*.s00;*.usr|Tutti i file|*.*
+en: Commodore files (*.prg;*.seq;*.p00;*.s00;*.usr)|*.prg;*.seq;*.p00;*.s00;*.usr|All files|*.*
+
+it: Per scrivere un'immagine disco usa il pulsante "Scrivi immagine…".
+en: To write a disk image use the "Write image…" button.
+
+it: Scrivi file su disco
+en: Write file to disk
+
+it: Nome sul disco:
+en: Name on disk:
+
+it: Seleziona un solo file.
+en: Select a single file.
+
+it: Nuovo nome:
+en: New name:
+
+it: Seleziona i file da cancellare.
+en: Select the files to delete.
+
+it: Cancellare definitivamente 
+en: Permanently delete 
+
+it:  file dal disco?
+en:  file(s) from the disk?
+
+it: Formatta disco
+en: Format disk
+
+it: Nome disco:
+en: Disk name:
+
+it: ID (2 caratteri, vuoto = formattazione veloce):
+en: ID (2 characters, empty = quick format):
+
+it: Tutti i dati sul disco verranno cancellati. Continuare?
+en: All data on the disk will be erased. Continue?
+
+it: Immagine 1541 (*.d64)|*.d64|Immagine 1571 doppia faccia (*.d71)|*.d71|Immagine 1581 (*.d81)|*.d81
+en: 1541 image (*.d64)|*.d64|1571 double-sided image (*.d71)|*.d71|1581 image (*.d81)|*.d81
+
+it: Crea immagine
+en: Create image
+
+it: Immagine salvata: 
+en: Image saved: 
+
+it: Immagini disco (*.d64;*.d71;*.d81)|*.d64;*.d71;*.d81|Tutti i file|*.*
+en: Disk images (*.d64;*.d71;*.d81)|*.d64;*.d71;*.d81|All files|*.*
+
+it: Dimensione immagine non riconosciuta (
+en: Unrecognized image size (
+
+it:  byte). Sono supportate D64 (35 tracce), D71 e D81.
+en:  bytes). Supported: D64 (35 tracks), D71 and D81.
+
+it: Scrivere 
+en: Write 
+
+it: ) sul disco nel drive 
+en: ) to the disk in drive 
+
+it: TUTTI i dati del disco verranno sovrascritti.\n\n
+en: ALL data on the disk will be overwritten.\n\n
+
+it: Sì = formatta prima il disco (consigliato)\nNo = scrivi senza formattare (disco già formattato)
+en: Yes = format the disk first (recommended)\nNo = write without formatting (disk already formatted)
+
+it: Scrivi immagine
+en: Write image
+
+it: Indica prima dove si trova VICE (x64sc.exe) nella scheda VICE.
+en: First tell where VICE (x64sc.exe) is, in the VICE tab.
+
+it: VICE avviato: 
+en: VICE started: 
+
+it: ERRORE: avvio di VICE non riuscito: 
+en: ERROR: could not start VICE: 
+
+it: Cartella dove salvare i file letti dal disco per VICE
+en: Folder where files read from the disk for VICE are saved
+
+it: Cartella dei file per VICE: 
+en: VICE files folder: 
+
+it: VICE C64 (x64sc.exe)|x64sc.exe|Programmi (*.exe)|*.exe
+en: VICE C64 (x64sc.exe)|x64sc.exe|Programs (*.exe)|*.exe
+
+it: Dov'è x64sc.exe di VICE?
+en: Where is VICE's x64sc.exe?
+
+it: Seleziona nella directory il programma da avviare.
+en: Select the program to run in the directory.
+
+it: Si possono avviare solo i file PRG.
+en: Only PRG files can be run.
+
+it: Avvio in VICE
+en: Starting in VICE
+
+it: File salvato: 
+en: File saved: 
+
+it: Immagini e programmi C64 (*.d64;*.d71;*.d81;*.prg;*.t64;*.tap;*.crt)|*.d64;*.d71;*.d81;*.prg;*.t64;*.tap;*.crt|Tutti i file|*.*
+en: C64 images and programs (*.d64;*.d71;*.d81;*.prg;*.t64;*.tap;*.crt)|*.d64;*.d71;*.d81;*.prg;*.t64;*.tap;*.crt|All files|*.*
+
+it: Scegli cosa avviare in VICE
+en: Choose what to run in VICE
+
+it: L'intero disco verrà copiato in un'immagine D64 temporanea e poi avviato in VICE.\n\nCon la copia normale servono circa 10 minuti. Continuare?
+en: The whole disk will be copied into a temporary D64 image and then started in VICE.\n\nWith the normal copy it takes about 10 minutes. Continue?
+
+it: Disco in VICE
+en: Disk in VICE
+
+it: Adattatore xum1541 trovato: firmware v8 (capacità 0x03)
+en: xum1541 adapter found: firmware v8 (capabilities 0x03)
+
+it: TEMI SCURI
+en: DARK THEMES
+
+it: TEMI CHIARI
+en: LIGHT THEMES
+
+it: Aspetto · tema
+en: Appearance · theme
+
+it: Apri il menu per vedere tutti i temi, oppure usa le frecce ↑ ↓. Il tema viene applicato quando premi Salva.
+en: Open the menu to see all the themes, or use the ↑ ↓ arrows. The theme is applied when you press Save.
+
+it: Carattere della directory
+en: Directory font
+
+it: Salvaschermo PETSCII
+en: PETSCII screen saver
+
+it: Attiva dopo 5 minuti senza usare tastiera e mouse
+en: Start after 5 minutes without keyboard or mouse use
+
+it: Nella finestra della directory (non copre le altre finestre)
+en: In the directory window (does not cover other windows)
+
+it: A tutto schermo (solo quando l'app è in primo piano)
+en: Full screen (only when the app is in the foreground)
+
+it: Prova ora
+en: Try it now
+
+it: Avvio
+en: Startup
+
+it: C'è un'operazione in corso: tema e carattere verranno applicati quando sarà finita.
+en: An operation is in progress: theme and font will be applied when it is finished.
+
+it: tema scuro
+en: dark theme
+
+it: tema chiaro
+en: light theme
+
+it: Cerco l'ultima versione di Zadig…
+en: Looking for the latest version of Zadig…
+
+it: Non trovo Zadig tra le release. Scaricalo da 
+en: Zadig not found among the releases. Download it from 
+
+it: Zadig è già nei Download: 
+en: Zadig is already in Downloads: 
+
+it: Zadig salvato in 
+en: Zadig saved to 
+
+it: Non trovo 
+en: Cannot find 
+
+it:  nella cartella di VICE: 
+en:  in the VICE folder: 
+
+it: Grigio ardesia con accenti indaco
+en: Slate gray with indigo accents
+
+it: Blu notte con accenti neon tenui
+en: Midnight blue with soft neon accents
+
+it: Beige e marrone del C64, arcobaleno C=
+en: C64 beige and brown, C= rainbow
+
+it: Chiaro e caldo, toni rosa, iris e pino
+en: Light and warm: rose, iris and pine
+
+it: Mocha: pastelli morbidi su fondo scuro
+en: Mocha: soft pastels on a dark background
+
+it: Verde bosco e sabbia, riposante
+en: Forest green and sand, easy on the eyes
+
+it: Caldo e retrò, schermo color ambra
+en: Warm and retro, amber screen
+
+it: Blu artici e grigi freddi
+en: Arctic blues and cool grays
+
+it: Notte blu-verde e luce di luna
+en: Blue-green night and moonlight
+
+it: Neutro, con lo schermo blu del C64
+en: Neutral, with the blue C64 screen
+
+it: Anni '80 · ispirato al carattere del Commodore 64
+en: '80s · inspired by the Commodore 64 font
+
+it: Anni '80 · come sopra, con le righe di un monitor a tubo
+en: '80s · as above, with CRT monitor lines
+
+it: Anni '80 · 8 bit da sala giochi
+en: '80s · 8-bit arcade
+
+it: Anni '80 · terminale DEC VT320
+en: '80s · DEC VT320 terminal
+
+it: Fantascienza · stile console tecnica
+en: Sci-fi · technical console style
+
+it: Programmatori · molto leggibile
+en: Programmers · very readable
+
+it: Programmatori · il preferito di molti nerd
+en: Programmers · a favorite of many nerds
+
+it: Programmatori · eredità IBM
+en: Programmers · IBM heritage
+
+it: Programmatori · quello del Terminale di Windows
+en: Programmers · the Windows Terminal one
+
+it: Classico · il carattere di sistema
+en: Classic · the system font
+
+it: L'adattatore è già in uso da un altro programma (chiudi la pagina web o altri programmi che lo usano).
+en: The adapter is already in use by another program (close the web page or other programs using it).
+
+it: WinUsb_Initialize fallito
+en: WinUsb_Initialize failed
+
+it: Timeout USB (
+en: USB timeout (
+
+it: Scrittura USB incompleta
+en: Incomplete USB write
+
+it: Adattatore xum1541 non trovato. Controlla il cavo USB e che il driver WinUSB sia installato con Zadig.
+en: xum1541 adapter not found. Check the USB cable and that the WinUSB driver is installed with Zadig.
+
+it: Risposta INIT non valida dall'adattatore
+en: Invalid INIT reply from the adapter
+
+it: Il drive non risponde da troppo tempo (è stato spento o scollegato?)
+en: The drive has not responded for too long (was it turned off or unplugged?)
+
+it: Risposta di stato non valida (
+en: Invalid status reply (
+
+it: Stato sconosciuto dall'adattatore: 
+en: Unknown status from the adapter: 
+
+it: troppi dati
+en: too much data
+
+it: Copio 
+en: Copying 
+
+it: Creo i collegamenti
+en: Creating shortcuts
+
+it: Registro l'applicazione
+en: Registering the application
+
+it: Installazione completata
+en: Installation complete
+
+it: Drive Commodore via USB con l'adattatore xum1541
+en: Commodore drives over USB with the xum1541 adapter
+
+it: Disinstalla 
+en: Uninstall 
+
+it: Installa 
+en: Install 
+
+it: Disinstallazione
+en: Uninstall
+
+it: Installazione
+en: Setup
+
+it:  · versione 
+en:  · version 
+
+it:  · di 
+en:  · by 
+
+it: Cartella di installazione
+en: Installation folder
+
+it: Crea un collegamento sul Desktop
+en: Create a Desktop shortcut
+
+it: Avvia 
+en: Start 
+
+it:  al termine
+en:  when finished
+
+it: Non servono permessi di amministratore. Il driver WinUSB per l'adattatore si installa a parte con Zadig\n(nell'app: scheda Adattatore → Strumenti necessari).
+en: No administrator rights needed. The WinUSB driver for the adapter is installed separately with Zadig\n(in the app: Adapter tab → Required tools).
+
+it: Verranno rimossi il programma, i collegamenti e la voce in "App installate".\nI file che hai salvato (immagini disco, file per VICE) non vengono toccati.
+en: The program, the shortcuts and the "Installed apps" entry will be removed.\nFiles you saved (disk images, files for VICE) are not touched.
+
+it: Elimina anche le impostazioni (tema, carattere, percorsi)
+en: Also delete the settings (theme, font, paths)
+
+it: Disinstalla
+en: Uninstall
+
+it: Installa
+en: Install
+
+it:  è aperto. Chiudilo e premi Riprova.
+en:  is open. Close it and press Retry.
+
+it: Rimozione in corso…
+en: Removing…
+
+it:  è stato disinstallato.
+en:  has been uninstalled.
+
+it: Fine
+en: Done
+
+it: Errore: 
+en: Error: 
+
+it: Operazione non riuscita:\n
+en: Operation failed:\n
+
+it: Chiaro
+en: Light
+
+it: Scuro
+en: Dark
+
+
+# DOS commands: placeholders to fill in
+it: S0:NOME
+en: S0:NAME
+
+it: R0:NUOVO=VECCHIO
+en: R0:NEW=OLD
+
+it: C0:COPIA=ORIGINALE
+en: C0:COPY=ORIGINAL
+
+it: C0:NUOVO=FILE1,FILE2
+en: C0:NEW=FILE1,FILE2
+
+it: N0:NOME,ID
+en: N0:NAME,ID
+
+it: N0:NOME
+en: N0:NAME

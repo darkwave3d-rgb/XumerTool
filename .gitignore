@@ -1,0 +1,9 @@
+# programmi compilati (si ricreano con build.bat / build-installer.bat)
+bin/
+*.exe
+*.pdb
+
+# file di sistema
+Thumbs.db
+desktop.ini
+*.tmp
