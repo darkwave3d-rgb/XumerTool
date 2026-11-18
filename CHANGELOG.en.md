@@ -2,6 +2,18 @@
 
 [Italiano](CHANGELOG.md)
 
+## 1.2.1b (beta) – 2026-11-18
+
+Fixes after a code review.
+
+- **Internet Archive, sign-in with email and password**: fixed. The site rejected the request and "Sign-in failed" appeared even with the right details.
+- **Internet Archive, S3 keys**: pasted keys are checked with the site's dedicated service and wrong keys are really rejected.
+- **Sturdier slow copy**: a sector that arrives incomplete is read again up to 3 times instead of stopping the whole copy; if the drive reports a real error, the sector goes into the image's error table.
+- **Fast copy not available** for the drive or format (e.g. D71 without a 1571): it switches to the normal copy straight away, with no waiting.
+- The "create image" band is dimmed together with its tiles when the drive is disconnected or busy.
+- Less wasted work: the disk map no longer recreates its fonts on every update and stops when the copy ends; the directory measures the icon column only once; the Internet Archive keys are saved in a single write.
+- `xumtest` (command-line tests) explains how to use it when the drive number is missing.
+
 ## 1.2b (beta) – 2026-11-18
 
 - **Portable version only**: the installer is set aside for now. Extract the zip wherever you like; `LEGGIMI.txt` and `README.txt` explain how to start and how to remove it (just delete the folder).
@@ -17,7 +29,7 @@
 - The screen saver no longer starts while an operation is running.
 - Fixed: after connecting or reading the directory the buttons sometimes stayed disabled (they came back only by changing theme).
 - Faster startup: the search for VICE runs in the background.
-- Safer image reading: a sector that arrives incomplete is read again (up to 3 times) instead of ending up damaged in the image.
+- Safer image reading: a sector that arrives incomplete gives an error instead of ending up damaged in the image.
 - Closing the program during an operation no longer makes it hang.
 
 ## 1.1b (beta) – 2026-11-18

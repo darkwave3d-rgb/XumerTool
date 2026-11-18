@@ -2,6 +2,18 @@
 
 [English](CHANGELOG.en.md)
 
+## 1.2.1b (beta) – 18/11/2026
+
+Correzioni dopo una revisione del codice.
+
+- **Internet Archive, accesso con email e password**: corretto. Il sito rifiutava la richiesta e compariva "Accesso non riuscito" anche con i dati giusti.
+- **Internet Archive, chiavi S3**: il controllo delle chiavi incollate usa il servizio apposito del sito e rifiuta davvero le chiavi sbagliate.
+- **Copia lenta più robusta**: un settore arrivato incompleto viene riletto fino a 3 volte, invece di interrompere tutta la copia; se il drive segnala un errore vero, il settore finisce nella tabella errori dell'immagine.
+- **Copia veloce non disponibile** per il drive o il formato (es. D71 senza 1571): si passa subito alla copia normale, senza attese.
+- La fascia "crea immagine" si oscura insieme ai suoi tasselli quando il drive è scollegato o occupato.
+- Meno lavoro inutile: la mappa del disco non ricrea i caratteri a ogni aggiornamento e si ferma a fine copia; la directory misura la colonna delle icone una volta sola; le chiavi di Internet Archive si salvano con una sola scrittura.
+- `xumtest` (prove da riga di comando) spiega come si usa se manca il numero del drive.
+
 ## 1.2b (beta) – 18/11/2026
 
 - **Solo versione portatile**: l'installer è messo da parte per ora. Lo zip si estrae dove si vuole; `LEGGIMI.txt` e `README.txt` spiegano come partire e come toglierlo (basta eliminare la cartella).
@@ -17,7 +29,7 @@
 - Il salvaschermo non parte più durante un'operazione in corso.
 - Corretto: dopo il collegamento o la lettura della directory i pulsanti a volte restavano disattivati (si riattivavano solo cambiando tema).
 - Apertura più rapida: la ricerca di VICE avviene in sottofondo.
-- Lettura delle immagini più sicura: un settore arrivato incompleto viene riletto (fino a 3 volte) invece di finire rovinato nell'immagine.
+- Lettura delle immagini più sicura: un settore arrivato incompleto dà errore invece di finire rovinato nell'immagine.
 - Chiudere il programma durante un'operazione non lo fa più bloccare.
 
 ## 1.1b (beta) – 18/11/2026

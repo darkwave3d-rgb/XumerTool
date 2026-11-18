@@ -1,5 +1,5 @@
-﻿XUMER TOOL 1.2b (beta) - by darkwave3D
-======================================
+﻿XUMER TOOL 1.2.1b (beta) - by darkwave3D
+========================================
 
 Windows program to use Commodore 1541, 1571 and 1581 drives
 with the xum1541 USB adapter (Arduino Pro Micro).

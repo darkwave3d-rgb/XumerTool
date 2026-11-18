@@ -19,7 +19,7 @@ namespace XumSetup
     static class Product
     {
         public const string Name = "XUMER TOOL";
-        public const string Version = "1.2b";   // "b" = beta
+        public const string Version = "1.2.1b";   // "b" = beta
         public const string Publisher = "darkwave3D";
         public const string Exe = "XumerTool.exe";
         public const string OldExe = "XumTool.exe";   // nome dell'eseguibile fino alla 1.0b del 18/11/2026

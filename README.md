@@ -9,7 +9,7 @@
 <p align="center">
   Programma per Windows per usare i drive Commodore <b>1541</b>, <b>1571</b> e <b>1581</b> dal PC,<br>
   con l'adattatore USB <b>xum1541</b>.<br>
-  <i>Versione 1.2b · beta · in italiano e in inglese</i>
+  <i>Versione 1.2.1b · beta · in italiano e in inglese</i>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 ## Installazione
 
-1. Scarica `XumerTool-1.2b-portable.zip` dalla pagina **Releases**, estrai la cartella `XUMER TOOL` dove preferisci e avvia `XumerTool.exe`. Non serve installare nulla; per toglierlo basta eliminare la cartella.
+1. Scarica `XumerTool-1.2.1b-portable.zip` dalla pagina **Releases**, estrai la cartella `XUMER TOOL` dove preferisci e avvia `XumerTool.exe`. Non serve installare nulla; per toglierlo basta eliminare la cartella.
 2. Installa il driver con Zadig: *Options → List All Devices*, scegli **xum1541**, poi **WinUSB** e **Install Driver**.
 3. Collega l'adattatore al drive e al PC e accendi il drive.
 4. Avvia XUMER TOOL: si collega da solo. Premi **Directory**.
