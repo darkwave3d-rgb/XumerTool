@@ -8,6 +8,7 @@
 - Translations live in a text file (`lang\en.txt`): adding other languages needs no changes to the interface code.
 - The executable is now called `XumerTool.exe`; the installer removes the old `XumTool.exe`.
 - The installation also includes an English `README.txt`.
+- Updated icon: the label now reads "xumerTool".
 
 ## 1.0b (beta) – 2026-11-18
 

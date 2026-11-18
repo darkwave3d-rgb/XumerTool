@@ -8,6 +8,7 @@
 - Le traduzioni stanno in un file di testo (`lang\en.txt`): per aggiungere altre lingue non serve toccare il codice dell'interfaccia.
 - L'eseguibile si chiama ora `XumerTool.exe`; l'installer toglie il vecchio `XumTool.exe`.
 - Nell'installazione c'è anche `README.txt` in inglese.
+- Icona aggiornata: sull'etichetta ora c'è scritto "xumerTool".
 
 ## 1.0b (beta) – 18/11/2026
 

@@ -87,7 +87,8 @@ static class IconMaker
             for (int x = 10; x <= 117; x++)
             {
                 Color c = src.GetPixel(x, y);
-                bool inBar = barRow && x >= 24 && x <= 101;
+                // fino alle estremità arrotondate: dove la barra lascia spazio al grigio il valore viene negativo e si scarta
+                bool inBar = barRow && x >= 21 && x <= 104;
                 float bg = inBar ? barBg : labelBg;
                 float v = (bg - Lum(c)) / Math.Max(20f, bg - inkLum);
                 if (!inBar)
