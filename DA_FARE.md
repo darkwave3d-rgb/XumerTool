@@ -14,9 +14,9 @@
 
 ## Lavori grandi, in ordine
 
-1. **Copia veloce (protocollo S2)**
-   - Il codice c'è già (`src/FastCopy.cs`, `src/Asm6502.cs`, `drivecode/*.a65`) ma non è mai stato provato sul drive vero.
-   - Provare l'assemblatore e la lettura veloce con un disco inserito, poi la scrittura su un disco da sacrificare, infine aggiungere l'opzione nell'interfaccia.
+1. **Copia veloce (protocollo S2)** – stato al 18/11/2026: codice completo (`src/FastCopy.cs`: `ReadImageFast`/`WriteImageFast`; `src/Asm6502.cs`; `drivecode/*.a65`), compila, ma non è chiamato da nessuna parte e non è mai stato provato sul drive.
+   - **Interfaccia**: i comandi veloci vanno in un **menu separato "Sperimentale"** (es. "Crea immagine veloce", "Scrivi immagine veloce"), con un avviso alla prima apertura. "Crea/Scrivi immagine" normali restano lenti e sicuri.
+   - Passi, dal più sicuro: 1) controllare il codice prodotto dall'assemblatore confrontandolo con OpenCBM; 2) aggiungere `xumtest.exe 8 fast-read disco.d64` e provare la sola lettura, confrontando l'immagine con quella della copia lenta (devono essere identiche); 3) scrittura su un disco da sacrificare, solo se lanciata dall'utente; 4) menu Sperimentale nell'app, con ritorno automatico alla copia lenta in caso di errore.
    - Risultato atteso: un disco intero in meno di un minuto, invece di circa 10.
 2. **Il drive come unità di Windows (es. Z:)**
    - Il disco nel 1571 compare in Esplora risorse come un'unità normale.

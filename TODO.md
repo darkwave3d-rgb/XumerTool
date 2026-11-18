@@ -14,9 +14,9 @@
 
 ## Big jobs, in order
 
-1. **Fast copy (S2 protocol)**
-   - The code is already there (`src/FastCopy.cs`, `src/Asm6502.cs`, `drivecode/*.a65`) but it has never been tested on a real drive.
-   - Test the assembler and the fast read with a disk inserted, then writing to a disk you can sacrifice, finally add the option to the interface.
+1. **Fast copy (S2 protocol)** – status on 2026-11-18: code complete (`src/FastCopy.cs`: `ReadImageFast`/`WriteImageFast`; `src/Asm6502.cs`; `drivecode/*.a65`), it compiles, but nothing calls it yet and it has never been tested on a real drive.
+   - **Interface**: the fast commands go into a **separate "Experimental" menu** (e.g. "Create image (fast)", "Write image (fast)"), with a warning the first time. The normal Create/Write image stay slow and safe.
+   - Steps, safest first: 1) check the assembler output against OpenCBM; 2) add `xumtest.exe 8 fast-read disk.d64` and test read-only, comparing the image with the one from the slow copy (they must be identical); 3) writing to a disk you can sacrifice, only when the user starts it; 4) Experimental menu in the app, falling back to the slow copy on errors.
    - Expected result: a whole disk in less than a minute, instead of about 10.
 2. **The drive as a Windows drive letter (e.g. Z:)**
    - The disk in the 1571 shows up in File Explorer as a normal drive.
